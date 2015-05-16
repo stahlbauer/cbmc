@@ -173,6 +173,18 @@ void goto_symext::symex_malloc(
 
   new_symbol_table.add(value_symbol);
 
+  side_effect_expr_nondett init(object_type);
+  replace_nondet(init);
+
+  guardt guard;
+  symex_assign_symbol(
+    state,
+    ssa_exprt(value_symbol.symbol_expr()),
+    nil_exprt(),
+    init,
+    guard,
+    symex_targett::HIDDEN);
+
   address_of_exprt rhs;
 
   if(object_type.id()==ID_array)

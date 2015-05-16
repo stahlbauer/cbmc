@@ -11,8 +11,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/rename.h>
 #include <util/std_expr.h>
 
-#include <pointer-analysis/add_failed_symbols.h>
-
 #include <analyses/dirty.h>
 
 #include "goto_symex.h"
@@ -72,42 +70,22 @@ void goto_symext::symex_decl(statet &state, const symbol_exprt &expr)
   state.rename(ssa.type(), l1_identifier, ns);
   ssa.update_type();
 
-  // in case of pointers, put something into the value set
-  if(ns.follow(expr.type()).id()==ID_pointer)
-  {
-    exprt failed=
-      get_failed_symbol(expr, ns);
-
-    exprt rhs;
-
-    if(failed.is_not_nil())
-    {
-      address_of_exprt address_of_expr;
-      address_of_expr.object()=failed;
-      address_of_expr.type()=expr.type();
-      rhs=address_of_expr;
-    }
-    else
-      rhs=exprt(ID_invalid);
-
-    state.rename(rhs, ns, goto_symex_statet::L1);
-    state.value_set.assign(ssa, rhs, ns, true, false);
-  }
-
-  // prevent propagation
-  state.propagation.remove(l1_identifier);
-
   // L2 renaming
   // inlining may yield multiple declarations of the same identifier
   // within the same L1 context
   if(state.level2.current_names.find(l1_identifier)==
      state.level2.current_names.end())
     state.level2.current_names[l1_identifier]=std::make_pair(ssa, 0);
-  state.level2.increase_counter(l1_identifier);
-  const bool record_events=state.record_events;
-  state.record_events=false;
-  state.rename(ssa, ns);
-  state.record_events=record_events;
+
+  // skip non-deterministic initialisation if the next instruction
+  // will take care of initialisation (but ensure int x=x; is handled
+  // properly)
+  goto_programt::const_targett next=state.source.pc;
+  ++next;
+  if(next->is_assign() &&
+     to_code_assign(next->code).lhs()==expr &&
+     to_code_assign(next->code).rhs().is_constant())
+    return;
 
   // we hide the declaration of auxiliary variables
   // and if the statement itself is hidden
@@ -116,10 +94,16 @@ void goto_symext::symex_decl(statet &state, const symbol_exprt &expr)
     state.top().hidden_function ||
     state.source.pc->source_location.get_hide();
 
-  target.decl(
-    state.guard.as_expr(),
+  side_effect_expr_nondett init(ssa.type());
+  replace_nondet(init);
+
+  guardt guard;
+  symex_assign_symbol(
+    state,
     ssa,
-    state.source,
+    nil_exprt(),
+    init,
+    guard,
     hidden?symex_targett::HIDDEN:symex_targett::STATE);
 
   assert(state.dirty);

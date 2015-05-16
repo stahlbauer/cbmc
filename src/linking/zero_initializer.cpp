@@ -13,6 +13,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/arith_tools.h>
 #include <util/std_types.h>
 #include <util/std_expr.h>
+#include <util/std_code.h>
 #include <util/pointer_offset_size.h>
 
 #include <ansi-c/c_types.h>
@@ -20,6 +21,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include "zero_initializer.h"
 
+template<bool nondet>
 class zero_initializert:public messaget
 {
 public:
@@ -68,7 +70,8 @@ Function: zero_initializert::zero_initializer_rec
 
 \*******************************************************************/
 
-exprt zero_initializert::zero_initializer_rec(
+template<bool nondet>
+exprt zero_initializert<nondet>::zero_initializer_rec(
   const typet &type,
   const source_locationt &source_location)
 {
@@ -85,31 +88,55 @@ exprt zero_initializert::zero_initializer_rec(
      type_id==ID_floatbv ||
      type_id==ID_fixedbv)
   {
-    exprt result=from_integer(0, type);
+    exprt result;
+    if(nondet)
+      result=side_effect_expr_nondett(type);
+    else
+      result=from_integer(0, type);
+
     result.add_source_location()=source_location;
     return result;
   }
   else if(type_id==ID_rational ||
           type_id==ID_real)
   {
-    constant_exprt result(ID_0, type);
+    exprt result;
+    if(nondet)
+      result=side_effect_expr_nondett(type);
+    else
+      result=constant_exprt(ID_0, type);
+
     result.add_source_location()=source_location;
     return result;
   }
   else if(type_id==ID_verilog_signedbv ||
           type_id==ID_verilog_unsignedbv)
   {
-    std::size_t width=to_bitvector_type(type).get_width();
-    std::string value(width, '0');
+    exprt result;
+    if(nondet)
+      result=side_effect_expr_nondett(type);
+    else
+    {
+      std::size_t width=to_bitvector_type(type).get_width();
+      std::string value(width, '0');
 
-    constant_exprt result(value, type);
+      result=constant_exprt(value, type);
+    }
+
     result.add_source_location()=source_location;
     return result;
   }
   else if(type_id==ID_complex)
   {
-    exprt sub_zero=zero_initializer_rec(type.subtype(), source_location);
-    complex_exprt result(sub_zero, sub_zero, to_complex_type(type));
+    exprt result;
+    if(nondet)
+      result=side_effect_expr_nondett(type);
+    else
+    {
+      exprt sub_zero=zero_initializer_rec(type.subtype(), source_location);
+      result=complex_exprt(sub_zero, sub_zero, to_complex_type(type));
+    }
+
     result.add_source_location()=source_location;
     return result;
   }
@@ -148,6 +175,13 @@ exprt zero_initializert::zero_initializer_rec(
       }
       else if(to_integer(array_type.size(), array_size))
       {
+        if(nondet)
+        {
+          exprt result=side_effect_expr_nondett(type);
+          result.add_source_location()=source_location;
+          return result;
+        }
+
         error().source_location=source_location;
         error() << "failed to zero-initialize array of non-fixed size `"
                 << to_string(array_type.size()) << "'" << eom;
@@ -178,6 +212,13 @@ exprt zero_initializert::zero_initializer_rec(
 
     if(to_integer(vector_type.size(), vector_size))
     {
+      if(nondet)
+      {
+        exprt result=side_effect_expr_nondett(type);
+        result.add_source_location()=source_location;
+        return result;
+      }
+
       error().source_location=source_location;
       error() << "failed to zero-initialize vector of non-fixed size `"
               << to_string(vector_type.size()) << "'" << eom;
@@ -308,7 +349,14 @@ exprt zero_initializert::zero_initializer_rec(
   }
   else if(type_id==ID_string)
   {
-    return constant_exprt(irep_idt(), type);
+    exprt result;
+    if(nondet)
+      result=side_effect_expr_nondett(type);
+    else
+      result=constant_exprt(irep_idt(), type);
+
+    result.add_source_location()=source_location;
+    return result;
   }
   else
   {
@@ -337,7 +385,29 @@ exprt zero_initializer(
   const namespacet &ns,
   message_handlert &message_handler)
 {
-  zero_initializert z_i(ns, message_handler);
+  zero_initializert<false> z_i(ns, message_handler);
+  return z_i(type, source_location);
+}
+
+/*******************************************************************\
+
+Function: nondet_initializer
+
+  Inputs:
+
+ Outputs:
+
+ Purpose:
+
+\*******************************************************************/
+
+exprt nondet_initializer(
+  const typet &type,
+  const source_locationt &source_location,
+  const namespacet &ns,
+  message_handlert &message_handler)
+{
+  zero_initializert<true> z_i(ns, message_handler);
   return z_i(type, source_location);
 }
 
@@ -363,7 +433,38 @@ exprt zero_initializer(
 
   try
   {
-    zero_initializert z_i(ns, mh);
+    zero_initializert<false> z_i(ns, mh);
+    return z_i(type, source_location);
+  }
+  catch(int)
+  {
+    throw oss.str();
+  }
+}
+
+/*******************************************************************\
+
+Function: nondet_initializer
+
+  Inputs:
+
+ Outputs:
+
+ Purpose:
+
+\*******************************************************************/
+
+exprt nondet_initializer(
+  const typet &type,
+  const source_locationt &source_location,
+  const namespacet &ns)
+{
+  std::ostringstream oss;
+  stream_message_handlert mh(oss);
+
+  try
+  {
+    zero_initializert<true> z_i(ns, mh);
     return z_i(type, source_location);
   }
   catch(int)
