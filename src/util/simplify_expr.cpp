@@ -2370,6 +2370,14 @@ bool simplify_exprt::simplify_byte_update(byte_update_exprt &expr)
 
       return false;
     }
+
+    if(result_expr.is_not_nil())
+    {
+      simplify_rec(result_expr);
+      expr.swap(result_expr);
+
+      return false;
+    }
   }
 
   // replace elements of array or struct expressions, possibly using
