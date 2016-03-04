@@ -8,6 +8,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <util/byte_operators.h>
 #include <util/cprover_prefix.h>
+#include <util/expr_util.h>
 
 #include <ansi-c/c_types.h>
 
@@ -35,6 +36,17 @@ void goto_symext::symex_assign_rec(
   code_assignt deref_code=code;
 
   clean_expr(deref_code.lhs(), state, true);
+  // make the structure of the lhs as simple as possible to avoid,
+  // e.g., (b ? s1 : s2).member=X resulting in
+  // (b ? s1 : s2)=(b ? s1 : s2) with member:=X and then
+  // s1=b ? ((b ? s1 : s2) with member:=X) : s1
+  // when all we need is
+  // s1=s1 with member:=X [and guard b]
+  // s2=s2 with member:=X [and guard !b]
+  do_simplify(deref_code.lhs());
+  // make sure simplify has not re-introduced any dereferencing that
+  // had previously been cleaned away
+  assert(!has_subexpr(deref_code.lhs(), ID_dereference));
   clean_expr(deref_code.rhs(), state, false);
 
   symex_assign(state, deref_code);
