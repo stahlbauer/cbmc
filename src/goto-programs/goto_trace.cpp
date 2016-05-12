@@ -60,7 +60,6 @@ void goto_trace_stept::output(
   switch(type)
   {
   case goto_trace_stept::ASSERT: out << "ASSERT"; break;
-  case goto_trace_stept::ASSUME: out << "ASSUME"; break;
   case goto_trace_stept::LOCATION: out << "LOCATION"; break;
   case goto_trace_stept::ASSIGNMENT: out << "ASSIGNMENT"; break;
   case goto_trace_stept::GOTO: out << "GOTO"; break;
@@ -73,10 +72,14 @@ void goto_trace_stept::output(
   case goto_trace_stept::SHARED_WRITE: out << "SHARED WRITE"; break;
   case goto_trace_stept::FUNCTION_CALL: out << "FUNCTION CALL"; break;
   case goto_trace_stept::FUNCTION_RETURN: out << "FUNCTION RETURN"; break;
-  default: assert(false);
+  case goto_trace_stept::DEAD: assert(false);
+  case goto_trace_stept::CONSTRAINT: assert(false);
+  case goto_trace_stept::MEMORY_BARRIER: assert(false);
+  case goto_trace_stept::SPAWN: assert(false);
+  case goto_trace_stept::NONE: assert(false);
   }
 
-  if(type==ASSERT || type==ASSUME || type==GOTO)
+  if(type==ASSERT || type==GOTO)
     out << " (" << cond_value << ")";
 
   if(hidden)
@@ -342,21 +345,6 @@ void show_goto_trace(
         out << "  " << step.comment << "\n";
 
         if(step.pc->is_assert())
-          out << "  " << from_expr(ns, "", step.pc->guard) << "\n";
-
-        out << "\n";
-      }
-      break;
-
-    case goto_trace_stept::ASSUME:
-      if(!step.cond_value)
-      {
-        out << "\n";
-        out << "Violated assumption:" << "\n";
-        if(!step.pc->source_location.is_nil())
-          out << "  " << step.pc->source_location << "\n";
-
-        if(step.pc->is_assume())
           out << "  " << from_expr(ns, "", step.pc->guard) << "\n";
 
         out << "\n";

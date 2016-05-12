@@ -378,7 +378,6 @@ void graphml_witnesst::operator()(const goto_tracet &goto_trace)
     case goto_trace_stept::FUNCTION_CALL:
     case goto_trace_stept::FUNCTION_RETURN:
     case goto_trace_stept::LOCATION:
-    case goto_trace_stept::ASSUME:
     case goto_trace_stept::INPUT:
     case goto_trace_stept::OUTPUT:
     case goto_trace_stept::SHARED_READ:
@@ -550,7 +549,6 @@ void graphml_witnesst::operator()(const symex_target_equationt &equation)
     case goto_trace_stept::FUNCTION_CALL:
     case goto_trace_stept::FUNCTION_RETURN:
     case goto_trace_stept::LOCATION:
-    case goto_trace_stept::ASSUME:
     case goto_trace_stept::INPUT:
     case goto_trace_stept::OUTPUT:
     case goto_trace_stept::SHARED_READ:
