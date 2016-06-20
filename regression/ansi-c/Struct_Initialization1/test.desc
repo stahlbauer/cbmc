@@ -1,8 +1,8 @@
-KNOWNBUG
+CORE
 main.c
 
-^EXIT=0$
+^EXIT=(64|1)$
 ^SIGNAL=0$
+^CONVERSION ERROR$
 --
 ^warning: ignoring
-^CONVERSION ERROR$
