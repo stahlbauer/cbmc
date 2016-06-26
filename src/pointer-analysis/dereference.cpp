@@ -513,7 +513,10 @@ exprt dereferencet::dereference_plus(
     std::swap(pointer, integer);
   }
   else if(!has_pointer(pointer, ns))
-    throw "missing pointer in pointer arithmetic";
+  {
+    invalid_cond.make_true();
+    return nil_exprt();
+  }
 
   exprt size=size_of_expr(char_type(), ns);
   assert(size.is_not_nil());
