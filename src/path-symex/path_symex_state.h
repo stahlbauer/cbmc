@@ -9,6 +9,8 @@ Author: Daniel Kroening, kroening@kroening.com
 #ifndef CPROVER_PATH_SYMEX_PATH_SYMEX_STATE_H
 #define CPROVER_PATH_SYMEX_PATH_SYMEX_STATE_H
 
+#include <cassert>
+
 #include "locs.h"
 #include "var_map.h"
 #include "path_symex_history.h"
@@ -108,11 +110,9 @@ public:
     current_thread=_thread;
   }
 
-  loc_reft get_pc() const;
-
   goto_programt::const_targett get_instruction() const
   {
-    return locs[get_pc()].target;
+    return locs[pc()].target;
   }
 
   bool is_executable() const
@@ -142,6 +142,7 @@ public:
 
   loc_reft pc() const
   {
+    assert(current_thread<threads.size());
     return threads[current_thread].pc;
   }
 

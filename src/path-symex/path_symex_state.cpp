@@ -52,24 +52,6 @@ path_symex_statet initial_state(
 
 /*******************************************************************\
 
-Function: path_symex_statet::get_pc
-
-  Inputs:
-
- Outputs:
-
- Purpose:
-
-\*******************************************************************/
-
-loc_reft path_symex_statet::get_pc() const
-{
-  assert(current_thread<threads.size());
-  return threads[current_thread].pc;
-}
-
-/*******************************************************************\
-
 Function: path_symex_statet::output
 
   Inputs:
