@@ -23,10 +23,11 @@ public:
     safety_checkert(_ns),
     show_vcc(false),
     eager_infeasibility(false),
-    depth_limit_set(false), // no limit
-    context_bound_set(false),
-    unwind_limit_set(false),
-    branch_bound_set(false),
+    depth_limit(0), // no limit
+    context_bound(0),
+    branch_bound(0),
+    unwind_limit(0),
+    time_limit(0),
     search_heuristic(search_heuristict::DFS)
   {
   }
@@ -36,40 +37,41 @@ public:
 
   void set_depth_limit(unsigned limit)
   {
-    depth_limit_set=true;
     depth_limit=limit;
   }
 
   void set_context_bound(unsigned limit)
   {
-    context_bound_set=true;
     context_bound=limit;
   }
 
   void set_branch_bound(unsigned limit)
   {
-    branch_bound_set=true;
     branch_bound=limit;
   }
 
   void set_unwind_limit(unsigned limit)
   {
-    unwind_limit_set=true;
     unwind_limit=limit;
+  }
+
+  void set_time_limit(unsigned limit)
+  {
+    time_limit=limit;
   }
 
   bool show_vcc;
   bool eager_infeasibility;
 
   // statistics
-  unsigned number_of_dropped_states;
-  unsigned number_of_paths;
-  unsigned number_of_steps;
-  unsigned number_of_feasible_paths;
-  unsigned number_of_infeasible_paths;
-  unsigned number_of_VCCs;
-  unsigned number_of_VCCs_after_simplification;
-  unsigned number_of_failed_properties;
+  std::size_t number_of_dropped_states;
+  std::size_t number_of_paths;
+  std::size_t number_of_steps;
+  std::size_t number_of_feasible_paths;
+  std::size_t number_of_infeasible_paths;
+  std::size_t number_of_VCCs;
+  std::size_t number_of_VCCs_after_simplification;
+  std::size_t number_of_failed_properties;
   std::size_t number_of_locs;
   absolute_timet start_time;
   time_periodt sat_time;
@@ -131,7 +133,7 @@ protected:
   unsigned context_bound;
   unsigned branch_bound;
   unsigned unwind_limit;
-  bool depth_limit_set, context_bound_set, unwind_limit_set, branch_bound_set;
+  unsigned time_limit;
 
   enum class search_heuristict { DFS, BFS, LOCS } search_heuristic;
 
