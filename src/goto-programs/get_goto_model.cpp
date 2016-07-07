@@ -87,7 +87,10 @@ bool get_goto_modelt::operator()(const cmdlinet &_cmdline)
 
         if(lf.language==NULL)
         {
-          error("failed to figure out type of file", filename);
+          source_locationt location;
+          location.set_file(filename);
+          error().source_location=location;
+          error() << "failed to figure out type of file" << eom;
           return true;
         }
 
