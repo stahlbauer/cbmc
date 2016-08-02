@@ -679,7 +679,7 @@ bool goto_symex_statet::l2_thread_read_encoding(
           // that implies the current one
           return false;
 
-        write_guard|=*it;
+        write_guard.logical_or(*it, ns);
       }
     }
 
@@ -704,7 +704,7 @@ bool goto_symex_statet::l2_thread_read_encoding(
         // that implies the current one
         return false;
 
-      read_guard|=*it;
+      read_guard.logical_or(*it, ns);
     }
 
     exprt cond=read_guard.as_expr();

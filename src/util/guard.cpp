@@ -12,7 +12,6 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include "std_expr.h"
 #include "simplify_utils.h"
-#include "symbol_table.h"
 #include "namespace.h"
 #include "guard.h"
 
@@ -169,7 +168,7 @@ guardt &operator -= (guardt &g1, const guardt &g2)
 
 /*******************************************************************\
 
-Function: operator |=
+Function: guardt::logical_or
 
   Inputs:
 
@@ -179,8 +178,10 @@ Function: operator |=
 
 \*******************************************************************/
 
-guardt &operator |= (guardt &g1, const guardt &g2)
+guardt& guardt::logical_or(const guardt &g2, const namespacet &ns)
 {
+  guardt &g1=*this;
+
   if(g2.is_false() || g1.is_true()) return g1;
   if(g1.is_false() || g2.is_true()) { g1=g2; return g1; }
 
@@ -194,8 +195,6 @@ guardt &operator |= (guardt &g1, const guardt &g2)
     else
       g1=or_exprt(g1, g2);
 
-    symbol_tablet symbol_table;
-    namespacet ns(symbol_table);
     bdd_exprt t(ns);
     t.from_expr(g1);
     g1=t.as_expr();
@@ -257,8 +256,6 @@ guardt &operator |= (guardt &g1, const guardt &g2)
     {
       g1.add(or_exprt(and_expr1, and_expr2));
 
-      symbol_tablet symbol_table;
-      namespacet ns(symbol_table);
       bdd_exprt t(ns);
       t.from_expr(g1);
       g1=t.as_expr();

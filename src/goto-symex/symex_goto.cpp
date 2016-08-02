@@ -244,7 +244,7 @@ void goto_symext::merge_gotos(statet &state)
     merge_value_sets(goto_state, state);
 
     // adjust guard
-    state.guard|=goto_state.guard;
+    state.guard.logical_or(goto_state.guard, ns);
 
     // adjust depth
     state.depth=std::min(state.depth, goto_state.depth);
