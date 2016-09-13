@@ -8,7 +8,7 @@ void __builtin_ms_va_start(void *ap, ...);
 void __builtin_ms_va_end(void *ap);
 void *__builtin_va_arg_pack();
 int __builtin_va_arg_pack_len();
-int __builtin_constant_p();
+int __builtin_constant_p(int);
 int __builtin_abs(int);
 int __builtin_finite(double);
 int __builtin_finitef(float);
