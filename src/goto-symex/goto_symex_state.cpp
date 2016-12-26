@@ -289,6 +289,7 @@ Function: goto_symex_statet::assignment
 
 \*******************************************************************/
 
+#if 0
 static bool check_renaming(const exprt &expr);
 
 static bool check_renaming(const typet &type)
@@ -369,10 +370,11 @@ static bool check_renaming(const exprt &expr)
 
   return false;
 }
+#endif
 
 static void assert_l1_renaming(const exprt &expr)
 {
-  #if 1
+  #if 0
   if(check_renaming_l1(expr))
   {
     std::cerr << expr.pretty() << std::endl;
@@ -385,7 +387,7 @@ static void assert_l1_renaming(const exprt &expr)
 
 static void assert_l2_renaming(const exprt &expr)
 {
-  #if 1
+  #if 0
   if(check_renaming(expr))
   {
     std::cerr << expr.pretty() << std::endl;
