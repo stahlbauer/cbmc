@@ -165,7 +165,14 @@ exprt bdd_exprt::as_expr(const bdd_exprt::BDDt &r) const
   else if(r.high().is_true())
     return or_exprt(n_expr, as_expr(r.low()));
   else
+    #if 0
+    return
+      and_exprt(
+        or_exprt(not_exprt(n_expr), as_expr(r.high())),
+        or_exprt(n_expr, as_expr(r.low())));
+    #else
     return if_exprt(n_expr, as_expr(r.high()), as_expr(r.low()));
+    #endif
 }
 
 /*******************************************************************\
