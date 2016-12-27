@@ -155,7 +155,7 @@ exprt bdd_exprt::as_expr(const bdd_exprt::BDDt &r) const
   }
   else if(r.high().is_false())
   {
-    if(r.high().is_true())
+    if(r.low().is_true())
       return not_exprt(n_expr);
     else
       return and_exprt(not_exprt(n_expr), as_expr(r.low()));
