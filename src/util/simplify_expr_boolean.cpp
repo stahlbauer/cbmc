@@ -9,9 +9,12 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <cassert>
 #include <unordered_set>
 
+#include <solvers/prop/bdd_expr.h>
+
 #include "simplify_expr_class.h"
 #include "expr.h"
 #include "namespace.h"
+#include "simplify_utils.h"
 #include "std_expr.h"
 
 /*******************************************************************\
@@ -86,6 +89,21 @@ bool simplify_exprt::simplify_boolean(exprt &expr)
           expr.id()==ID_xor)
   {
     if(operands.empty()) return true;
+
+    #if 0
+    bdd_exprt t(ns);
+    t.from_expr(expr);
+    exprt tmp=t.as_expr();
+    sort_and_join(tmp);
+
+    if(tmp!=expr)
+    {
+      expr.swap(tmp);
+      return false;
+    }
+
+    return true;
+    #else
 
     bool result=true;
 
@@ -188,6 +206,7 @@ bool simplify_exprt::simplify_boolean(exprt &expr)
     }
 
     return result;
+    #endif
   }
 
   return true;
