@@ -13,7 +13,8 @@ OBJ += ../big-int/big-int$(LIBEXT) \
       ../cpp/cpp$(LIBEXT) \
       ../xmllang/xmllang$(LIBEXT) \
       ../assembler/assembler$(LIBEXT) \
-      ../langapi/langapi$(LIBEXT)
+      ../langapi/langapi$(LIBEXT) \
+      ../solvers/solvers$(LIBEXT)
 
 INCLUDES= -I ..
 
