@@ -188,6 +188,7 @@ public:
     level2t::current_namest level2_current_names;
     value_sett value_set;
     guardt guard;
+    guardt guard_before_branch;
     propagationt propagation;
     unsigned atomic_section_id;
 
