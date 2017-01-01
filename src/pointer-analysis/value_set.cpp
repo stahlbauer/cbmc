@@ -744,8 +744,8 @@ void value_sett::get_value_set_rec(
       objectt object=it->second;
 
       // adjust by offset
-      if(object.offset_is_zero() && i_is_set)
-        object.offset=i;
+      if(object.offset_is_set && i_is_set)
+        object.offset+=i;
       else
         object.offset_is_set=false;
 
@@ -1156,8 +1156,8 @@ void value_sett::get_reference_set_rec(
         {
         }
         else if(!to_integer(offset, i) &&
-                o.offset_is_zero())
-          o.offset=i*pointer_offset_size(array_type.subtype(), ns);
+                o.offset_is_set)
+          o.offset+=i*pointer_offset_size(array_type.subtype(), ns);
         else
           o.offset_is_set=false;
 
