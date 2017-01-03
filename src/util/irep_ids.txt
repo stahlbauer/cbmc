@@ -203,7 +203,7 @@ destination
 main
 expression
 free
-malloc
+allocate
 cpp_new
 cpp_delete
 cpp_new_array cpp_new[]

@@ -160,7 +160,7 @@ void ansi_c_internal_additions(std::string &code)
     "extern unsigned char __CPROVER_memory[__CPROVER_constant_infinity_uint];\n"
 
     // malloc
-    "void *__CPROVER_malloc(__CPROVER_size_t size);\n"
+    "void *__CPROVER_allocate(__CPROVER_size_t size, __CPROVER_bool zero);\n"
     "const void *__CPROVER_deallocated=0;\n"
     "const void *__CPROVER_dead_object=0;\n"
     "const void *__CPROVER_malloc_object=0;\n"
