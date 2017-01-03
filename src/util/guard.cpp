@@ -139,9 +139,9 @@ guardt &operator -= (guardt &g1, const guardt &g2)
   if(g1.id()!=ID_and || g2.id()!=ID_and)
     return g1;
 
-  sort_and_join(g1);
+  // sort_and_join(g1);
   guardt g2_sorted=g2;
-  sort_and_join(g2_sorted);
+  // sort_and_join(g2_sorted);
 
   exprt::operandst &op1=g1.operands();
   const exprt::operandst &op2=g2_sorted.operands();
@@ -152,10 +152,12 @@ guardt &operator -= (guardt &g1, const guardt &g2)
       it2!=op2.end();
       ++it2)
   {
-    while(it1!=op1.end() && *it1<*it2)
-      ++it1;
+    /*while(it1!=op1.end() && *it1<*it2)
+      ++it1;*/
     if(it1!=op1.end() && *it1==*it2)
       it1=op1.erase(it1);
+    else
+      break;
   }
 
   g1=conjunction(op1);
@@ -201,9 +203,9 @@ guardt &operator |= (guardt &g1, const guardt &g2)
   }
 
   // find common prefix
-  sort_and_join(g1);
+  // sort_and_join(g1);
   guardt g2_sorted=g2;
-  sort_and_join(g2_sorted);
+  // sort_and_join(g2_sorted);
 
   exprt::operandst &op1=g1.operands();
   const exprt::operandst &op2=g2_sorted.operands();
