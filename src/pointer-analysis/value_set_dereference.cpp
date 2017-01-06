@@ -606,8 +606,11 @@ value_set_dereferencet::valuet value_set_dereferencet::build_reference_to(
       result.value=o.root_object();
 
       // this is relative to the root object
-      const exprt offset=
-        unary_exprt(ID_pointer_offset, pointer_expr, index_type());
+      exprt offset;
+      if(o.offset().id()==ID_unknown)
+        offset=unary_exprt(ID_pointer_offset, pointer_expr, index_type());
+      else
+        offset=o.offset();
 
       if(memory_model(result.value, dereference_type, tmp_guard, offset))
       {
