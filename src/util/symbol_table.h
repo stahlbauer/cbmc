@@ -88,8 +88,7 @@ public:
     return symbols.find(name)!=symbols.end();
   }
 
-  symbolt &lookup(const irep_idt &identifier);
-  const symbolt &lookup(const irep_idt &identifier) const;
+  symbolt &get(const irep_idt &identifier);
 };
 
 std::ostream &operator << (

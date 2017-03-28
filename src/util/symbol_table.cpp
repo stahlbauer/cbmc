@@ -161,7 +161,7 @@ void symbol_tablet::show(std::ostream &out) const
 
 /*******************************************************************\
 
-Function: symbol_tablet::lookup
+Function: symbol_tablet::get
 
  Inputs:
   identifier - The name of the symbol to look for
@@ -173,31 +173,7 @@ Function: symbol_tablet::lookup
 
 \*******************************************************************/
 
-const symbolt &symbol_tablet::lookup(const irep_idt &identifier) const
-{
-  symbolst::const_iterator it=symbols.find(identifier);
-
-  if(it==symbols.end())
-    throw "symbol "+id2string(identifier)+" not found";
-
-  return it->second;
-}
-
-/*******************************************************************\
-
-Function: symbol_tablet::lookup
-
- Inputs:
-  identifier - The name of the symbol to look for
-
- Outputs: The symbol in the symbol table with the correct name
-
- Purpose: Find a symbol in the symbol table. Throws a string if no
-          such symbol is found.
-
-\*******************************************************************/
-
-symbolt &symbol_tablet::lookup(const irep_idt &identifier)
+symbolt &symbol_tablet::get(const irep_idt &identifier)
 {
   symbolst::iterator it=symbols.find(identifier);
 
