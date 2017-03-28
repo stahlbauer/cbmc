@@ -16,7 +16,7 @@ Date:   December 2016
 #include <algorithm>
 
 #include <util/std_expr.h>
-#include <util/symbol_table.h>
+#include <util/namespace.h>
 
 #include "remove_exceptions.h"
 
@@ -28,7 +28,7 @@ class remove_exceptionst
 
 public:
   explicit remove_exceptionst(symbol_tablet &_symbol_table):
-    symbol_table(_symbol_table)
+    symbol_table(_symbol_table), ns(symbol_table)
   {
   }
 
@@ -37,6 +37,7 @@ public:
 
 protected:
   symbol_tablet &symbol_table;
+  namespacet ns;
 
   void add_exceptional_returns(
     const goto_functionst::function_mapt::iterator &);
@@ -80,8 +81,7 @@ void remove_exceptionst::add_exceptional_returns(
   const irep_idt &function_id=func_it->first;
   goto_programt &goto_program=func_it->second.body;
 
-  assert(symbol_table.has_symbol(function_id));
-  const symbolt &function_symbol=symbol_table.lookup(function_id);
+  const symbolt &function_symbol=ns.lookup(function_id);
 
   // for now only add exceptional returns for Java
   if(function_symbol.mode!=ID_java)
@@ -105,10 +105,7 @@ void remove_exceptionst::add_exceptional_returns(
   if(add_exceptional_var)
   {
     // look up the function symbol
-    symbol_tablet::symbolst::iterator s_it=
-      symbol_table.symbols.find(function_id);
-
-    assert(s_it!=symbol_table.symbols.end());
+    assert(symbol_table.has_symbol(function_id));
 
     auxiliary_symbolt new_symbol;
     new_symbol.is_static_lifetime=true;
@@ -162,7 +159,7 @@ void remove_exceptionst::instrument_exception_handler(
   if(symbol_table.has_symbol(id2string(function_id)+EXC_SUFFIX))
   {
     const symbolt &function_symbol=
-      symbol_table.lookup(id2string(function_id)+EXC_SUFFIX);
+      ns.lookup(id2string(function_id)+EXC_SUFFIX);
     // next we reset the exceptional return to NULL
     symbol_exprt lhs_expr_null=function_symbol.symbol_expr();
     null_pointer_exprt rhs_expr_null((pointer_typet(empty_typet())));
@@ -231,7 +228,7 @@ void remove_exceptionst::instrument_throw(
 
   // find the symbol corresponding to the caught exceptions
   const symbolt &exc_symbol=
-        symbol_table.lookup(id2string(function_id)+EXC_SUFFIX);
+    ns.lookup(id2string(function_id)+EXC_SUFFIX);
   symbol_exprt exc_thrown=exc_symbol.symbol_expr();
 
   // add GOTOs implementing the dynamic dispatch of the
@@ -318,7 +315,7 @@ void remove_exceptionst::instrument_function_call(
   {
     // we may have an escaping exception
     const symbolt &callee_exc_symbol=
-      symbol_table.lookup(id2string(callee_id)+EXC_SUFFIX);
+      ns.lookup(id2string(callee_id)+EXC_SUFFIX);
     symbol_exprt callee_exc=callee_exc_symbol.symbol_expr();
 
     // find the end of the function
@@ -377,7 +374,7 @@ void remove_exceptionst::instrument_function_call(
     // after each function call g() in function f
     // adds f#exception_value=g#exception_value;
     const symbolt &caller=
-      symbol_table.lookup(id2string(function_id)+EXC_SUFFIX);
+      ns.lookup(id2string(function_id)+EXC_SUFFIX);
     const symbol_exprt &lhs_expr=caller.symbol_expr();
 
     goto_programt::targett t=goto_program.insert_after(instr_it);

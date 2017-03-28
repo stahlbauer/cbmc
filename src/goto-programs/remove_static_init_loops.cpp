@@ -19,14 +19,14 @@ class remove_static_init_loopst
 public:
   explicit remove_static_init_loopst(
     const symbol_tablet &_symbol_table):
-    symbol_table(_symbol_table)
+    ns(_symbol_table)
     {}
 
   void unwind_enum_static(
     const goto_functionst &goto_functions,
     optionst &options);
 protected:
-  const symbol_tablet &symbol_table;
+  const namespacet ns;
 };
 
 /*******************************************************************\
@@ -60,14 +60,14 @@ void remove_static_init_loopst::unwind_enum_static(
         const std::string &fname=id2string(ins.function);
         size_t class_prefix_length=fname.find_last_of('.');
         // is Java function and static init?
-        const symbolt &function_name=symbol_table.lookup(ins.function);
+        const symbolt &function_name=ns.lookup(ins.function);
         if(!(function_name.mode==ID_java && has_suffix(fname, java_clinit)))
           continue;
         assert(
           class_prefix_length!=std::string::npos &&
           "could not identify class name");
         const std::string &classname=fname.substr(0, class_prefix_length);
-        const symbolt &class_symbol=symbol_table.lookup(classname);
+        const symbolt &class_symbol=ns.lookup(classname);
         const class_typet &class_type=to_class_type(class_symbol.type);
         size_t unwinds=class_type.get_size_t(ID_java_enum_static_unwind);
 

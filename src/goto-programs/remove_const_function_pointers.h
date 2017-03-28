@@ -25,8 +25,7 @@ public:
   remove_const_function_pointerst(
     message_handlert &message_handler,
     const exprt &base_expression,
-    const namespacet &ns,
-    const symbol_tablet &symbol_table);
+    const namespacet &ns);
 
   bool operator()(functionst &out_functions);
 
@@ -92,7 +91,6 @@ private:
 
   const exprt original_expression;
   const namespacet &ns;
-  const symbol_tablet &symbol_table;
 };
 
 #define OPT_REMOVE_CONST_FUNCTION_POINTERS \

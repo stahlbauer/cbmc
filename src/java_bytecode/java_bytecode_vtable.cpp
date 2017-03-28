@@ -213,7 +213,7 @@ public:
 
   void operator()(const irep_idt &symbol_name)
   {
-    const symbolt &symbol=symbol_table.lookup(symbol_name);
+    const symbolt &symbol=ns.lookup(symbol_name);
     if(!is_class_with_vt(symbol))
       return;
     const class_typet &class_type(to_class_type(symbol.type));

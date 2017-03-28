@@ -41,7 +41,8 @@ public:
     const std::string meta_name=get_Sx(loop_id, skid++);
     pos=declare_cegis_meta_variable(st, gf, pos, meta_name, type);
     const std::string full_meta_name(get_cegis_meta_name(meta_name));
-    const symbol_exprt meta_var(st.lookup(full_meta_name).symbol_expr());
+    const namespacet ns(st);
+    const symbol_exprt meta_var(ns.lookup(full_meta_name).symbol_expr());
     const irep_idt &sklm_name=get_affected_variable(*sklm);
     cegis_assign_user_variable(st, gf, sklm, sklm_name, meta_var);
     meta.Sx.push_back(pos);

@@ -119,6 +119,8 @@ void record_function_outputs(
   code_blockt &init_code,
   symbol_tablet &symbol_table)
 {
+  const namespacet ns(symbol_table);
+
   bool has_return_value=
     to_code_type(function.type).return_type()!=empty_typet();
 
@@ -128,7 +130,7 @@ void record_function_outputs(
     codet output(ID_output);
     output.operands().resize(2);
 
-    const symbolt &return_symbol=symbol_table.lookup("return'");
+    const symbolt &return_symbol=ns.lookup("return'");
 
     output.op0()=
       address_of_exprt(
@@ -152,7 +154,7 @@ void record_function_outputs(
 
     irep_idt identifier=p.get_identifier();
 
-    const symbolt &symbol=symbol_table.lookup(identifier);
+    const symbolt &symbol=ns.lookup(identifier);
 
     if(symbol.type.id()==ID_pointer)
     {

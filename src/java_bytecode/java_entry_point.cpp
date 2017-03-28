@@ -105,6 +105,8 @@ bool java_static_lifetime_init(
   bool assume_init_pointers_not_null,
   unsigned max_nondet_array_length)
 {
+  namespacet ns(symbol_table);
+
   symbolt &initialize_symbol=symbol_table.lookup(INITIALIZE);
   code_blockt &code_block=to_code_block(to_code(initialize_symbol.value));
 
@@ -118,7 +120,7 @@ bool java_static_lifetime_init(
 
   for(const auto &symname : symbol_names)
   {
-    const symbolt &sym=symbol_table.lookup(symname);
+    const symbolt &sym=ns.lookup(symname);
     if(should_init_symbol(sym))
     {
       if(sym.value.is_nil() && sym.type!=empty_typet())
@@ -237,8 +239,9 @@ exprt::operandst java_build_arguments(
         function.location,
         message_handler);
 
+    const namespacet ns(symbol_table);
     const symbolt &p_symbol=
-      symbol_table.lookup(parameters[param_number].get_identifier());
+      ns.lookup(parameters[param_number].get_identifier());
 
     // record as an input
     codet input(ID_input);
@@ -275,6 +278,8 @@ void java_record_outputs(
   code_blockt &init_code,
   symbol_tablet &symbol_table)
 {
+  namespacet ns(symbol_table);
+
   const code_typet::parameterst &parameters=
     to_code_type(function.type).parameters();
 
@@ -290,7 +295,7 @@ void java_record_outputs(
     codet output(ID_output);
     output.operands().resize(2);
 
-    const symbolt &return_symbol=symbol_table.lookup("return'");
+    const symbolt &return_symbol=ns.lookup("return'");
 
     output.op0()=
       address_of_exprt(
@@ -308,7 +313,7 @@ void java_record_outputs(
       param_number++)
   {
     const symbolt &p_symbol=
-      symbol_table.lookup(parameters[param_number].get_identifier());
+      ns.lookup(parameters[param_number].get_identifier());
 
     if(p_symbol.type.id()==ID_pointer)
     {
@@ -334,7 +339,7 @@ void java_record_outputs(
   assert(symbol_table.has_symbol(id2string(function.name)+EXC_SUFFIX));
 
   // retrieve the exception variable
-  const symbolt exc_symbol=symbol_table.lookup(
+  const symbolt exc_symbol=ns.lookup(
     id2string(function.name)+EXC_SUFFIX);
 
   output.op0()=address_of_exprt(

@@ -281,7 +281,8 @@ void java_bytecode_convert_methodt::convert(
     id2string(class_symbol.name)+"."+id2string(m.name)+":"+m.signature;
   method_id=method_identifier;
 
-  const auto &old_sym=symbol_table.lookup(method_identifier);
+  const namespacet ns(symbol_table);
+  const auto &old_sym=ns.lookup(method_identifier);
 
   typet member_type=old_sym.type;
   code_typet &code_type=to_code_type(member_type);

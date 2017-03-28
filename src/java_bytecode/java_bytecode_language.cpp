@@ -584,6 +584,8 @@ bool java_bytecode_languaget::do_ci_lazy_method_conversion(
   class_hierarchyt ch;
   ch(symbol_table);
 
+  namespacet ns(symbol_table);
+
   std::vector<irep_idt> method_worklist1;
   std::vector<irep_idt> method_worklist2;
 
@@ -616,7 +618,7 @@ bool java_bytecode_languaget::do_ci_lazy_method_conversion(
   std::set<irep_idt> needed_classes;
   initialize_needed_classes(
     method_worklist2,
-    namespacet(symbol_table),
+    ns,
     ch,
     needed_classes);
 
@@ -653,7 +655,7 @@ bool java_bytecode_languaget::do_ci_lazy_method_conversion(
           safe_pointer<std::set<irep_idt> >::create_non_null(
             &needed_classes));
         gather_virtual_callsites(
-          symbol_table.lookup(mname).value,
+          ns.lookup(mname).value,
           virtual_callsites);
         any_new_methods=true;
       }

@@ -369,8 +369,7 @@ void remove_function_pointerst::remove_function_pointer(
   }
   else
   {
-    remove_const_function_pointerst fpr(
-    get_message_handler(), pointer, ns, symbol_table);
+    remove_const_function_pointerst fpr(get_message_handler(), pointer, ns);
 
     found_functions=fpr(functions);
 

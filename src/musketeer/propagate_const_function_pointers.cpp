@@ -358,6 +358,8 @@ void const_function_pointer_propagationt::arg_stackt::add_args(
   const symbol_exprt &const_function,
   goto_programt::instructionst::iterator it)
 {
+  const namespacet cfpp_ns(cfpp.symbol_table);
+
   /* if constant pointers passed as arguments, add the names of the parameters
      in the function definition to the map */
   const code_function_callt::argumentst &arg=
@@ -393,7 +395,7 @@ void const_function_pointer_propagationt::arg_stackt::add_args(
       const symbol_exprt &arg_symbol_expr=to_symbol_expr(arg_expr);
 
       // const symbolt &arg_symbol=
-        // cfpp.symbol_table.lookup(arg_symbol_expr.get_identifier());
+        // cfpp_ns.lookup(arg_symbol_expr.get_identifier());
 
       // debug
       for(std::unordered_map<irep_idt, unsigned, irep_id_hash>::const_iterator
@@ -411,13 +413,13 @@ void const_function_pointer_propagationt::arg_stackt::add_args(
     else
     {
       cfpp.message.debug() << "fun: " << const_function.get_identifier()
-        << " - arg: (symb) " << cfpp.symbol_table
+        << " - arg: (symb) " << cfpp_ns
           .lookup(to_symbol_expr(*arg_it).get_identifier()).base_name
         << messaget::eom;
 
       const symbol_exprt &arg_symbol_expr=to_symbol_expr(*arg_it);
       const symbolt &arg_symbol=
-        cfpp.symbol_table.lookup(arg_symbol_expr.get_identifier());
+        cfpp_ns.lookup(arg_symbol_expr.get_identifier());
 
       if(cfpp.has(arg_symbol.base_name))
       {
@@ -504,7 +506,7 @@ void const_function_pointer_propagationt::propagate(
         continue;
       const symbol_exprt &symbol_expr_lhs=to_symbol_expr(lhs);
       const symbolt &symbol_lhs=
-        symbol_table.lookup(symbol_expr_lhs.get_identifier());
+        ns.lookup(symbol_expr_lhs.get_identifier());
 
       add(symbol_lhs.base_name, symbol_rhs);
     }
@@ -526,7 +528,7 @@ void const_function_pointer_propagationt::propagate(
 
         const symbol_exprt &fun_symbol_expr=to_symbol_expr(fun_pointer);
         const symbolt &fun_symbol=
-          symbol_table.lookup(fun_symbol_expr.get_identifier());
+          ns.lookup(fun_symbol_expr.get_identifier());
         symbol_exprt const_function;
         unsigned stack_scope=0;
 

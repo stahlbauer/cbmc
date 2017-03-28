@@ -24,7 +24,6 @@ Function: remove_const_function_pointerst::remove_const_function_pointerst
    message_handler - The message handler for messaget
    base_expression - The function call through a function pointer
    ns - The namespace to use to resolve types
-   symbol_table - The symbol table to look up symbols in
 
  Outputs:
 
@@ -36,12 +35,10 @@ Function: remove_const_function_pointerst::remove_const_function_pointerst
 remove_const_function_pointerst::remove_const_function_pointerst(
   message_handlert &message_handler,
   const exprt &base_expression,
-  const namespacet &ns,
-  const symbol_tablet &symbol_table):
+  const namespacet &ns):
     messaget(message_handler),
     original_expression(base_expression),
-    ns(ns),
-    symbol_table(symbol_table)
+    ns(ns)
 {}
 
 /*******************************************************************\
@@ -98,8 +95,7 @@ exprt remove_const_function_pointerst::replace_const_symbols(
   {
     if(is_const_expression(expression))
     {
-      const symbolt &symbol=
-        symbol_table.lookup(expression.get(ID_identifier));
+      const symbolt &symbol=ns.lookup(expression.get(ID_identifier));
       if(symbol.type.id()!=ID_code)
       {
         const exprt &symbol_value=symbol.value;
@@ -145,8 +141,7 @@ Function: remove_const_function_pointerst::resolve_symbol
 exprt remove_const_function_pointerst::resolve_symbol(
   const symbol_exprt &symbol_expr) const
 {
-  const symbolt &symbol=
-    symbol_table.lookup(symbol_expr.get_identifier());
+  const symbolt &symbol=ns.lookup(symbol_expr.get_identifier());
   return symbol.value;
 }
 
