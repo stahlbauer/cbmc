@@ -8,8 +8,9 @@ Author: Daniel Kroening, kroening@kroening.com
 \*******************************************************************/
 
 #include <util/bv_arithmetic.h>
-#include <util/symbol_table.h>
+#include <util/namespace.h>
 #include <util/std_types.h>
+#include <util/symbol.h>
 
 #include <cegis/jsa/value/jsa_genetic_synthesis.h>
 #include <cegis/jsa/options/jsa_program_info.h>
@@ -20,23 +21,23 @@ size_t to_size(const exprt &expr)
   return static_cast<size_t>(bv.to_integer().to_long());
 }
 
-size_t get_size(const symbol_tablet &st, const char * const id)
+size_t get_size(const namespacet &ns, const char * const id)
 {
-  return to_size(to_array_type(st.lookup(id).type).size());
+  return to_size(to_array_type(ns.lookup(id).type).size());
 }
 
 #define PRED_RELAY "__CPROVER_JSA_MAX_PRED_SIZE_RELAY"
 
-size_t get_max_pred_size(const symbol_tablet &st)
+size_t get_max_pred_size(const namespacet &ns)
 {
-  return get_size(st, PRED_RELAY);
+  return get_size(ns, PRED_RELAY);
 }
 
 #define QUERY_RELAY "__CPROVER_JSA_MAX_QUERY_SIZE_RELAY"
 
-size_t get_max_query_size(const symbol_tablet &st)
+size_t get_max_query_size(const namespacet &ns)
 {
-  return get_size(st, QUERY_RELAY);
+  return get_size(ns, QUERY_RELAY);
 }
 
 size_t get_max_inv_size()
@@ -59,21 +60,21 @@ size_t get_invariant_instruction_set_size()
   return __CPROVER_JSA_NUM_INV_INSTRUCTIONS;
 }
 
-size_t get_num_jsa_preds(const symbol_tablet &st)
+size_t get_num_jsa_preds(const namespacet &ns)
 {
-  return get_size(st, JSA_PREDS);
+  return get_size(ns, JSA_PREDS);
 }
 
 #define MAX_IT "__CPROVER_JSA_MAX_ITERATORS_RELAY"
 
-size_t get_max_iterators(const symbol_tablet &st)
+size_t get_max_iterators(const namespacet &ns)
 {
-  return get_size(st, MAX_IT);
+  return get_size(ns, MAX_IT);
 }
 
 #define MAX_LIST "__CPROVER_JSA_MAX_LISTS_RELAY"
 
-size_t get_max_lists(const symbol_tablet &st)
+size_t get_max_lists(const namespacet &ns)
 {
-  return get_size(st, MAX_LIST);
+  return get_size(ns, MAX_LIST);
 }

@@ -25,38 +25,46 @@ Author: Daniel Kroening, kroening@kroening.com
 
 namespace
 {
-void make_constraint_call(const symbol_tablet &st, goto_functionst &gf,
-    goto_programt::targett pos, const code_function_callt::argumentst &args)
+void make_constraint_call(
+  const namespacet &ns,
+  goto_functionst &gf,
+  goto_programt::targett pos,
+  const code_function_callt::argumentst &args)
 {
   goto_programt &body=get_entry_body(gf);
-  const symbol_exprt lhs(st.lookup(get_affected_variable(*pos)).symbol_expr());
+  const symbol_exprt lhs(ns.lookup(get_affected_variable(*pos)).symbol_expr());
   pos=body.insert_after(pos);
   pos->type=goto_program_instruction_typet::FUNCTION_CALL;
   pos->source_location=jsa_builtin_source_location();
   code_function_callt call;
   call.lhs()=lhs;
-  call.function()=st.lookup(JSA_INV_EXEC).symbol_expr();
+  call.function()=ns.lookup(JSA_INV_EXEC).symbol_expr();
   call.arguments()=args;
   pos->code=call;
   remove_return(body, pos);
 }
 
-void make_constraint_call(const symbol_tablet &st, goto_functionst &gf,
-    const goto_programt::targett &pos)
+void make_constraint_call(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &pos)
 {
   code_function_callt::argumentst args;
   args.push_back(address_of_exprt(get_user_heap(gf)));
-  args.push_back(address_of_exprt(get_queried_heap(st)));
-  const symbol_exprt p(st.lookup(get_cegis_meta_name(JSA_INV)).symbol_expr());
+  args.push_back(address_of_exprt(get_queried_heap(ns)));
+  const symbol_exprt p(ns.lookup(get_cegis_meta_name(JSA_INV)).symbol_expr());
   constant_exprt zero=from_integer(0, signed_int_type());
   args.push_back(address_of_exprt(index_exprt(p, zero)));
-  args.push_back(st.lookup(get_cegis_meta_name(JSA_INV_SZ)).symbol_expr());
-  make_constraint_call(st, gf, pos, args);
+  args.push_back(ns.lookup(get_cegis_meta_name(JSA_INV_SZ)).symbol_expr());
+  make_constraint_call(ns, gf, pos, args);
 }
 
-void make_query_call(jsa_programt &prog, const symbol_tablet &st,
-    goto_functionst &gf, goto_programt::targett pos,
-    const bool full_query=false)
+void make_query_call(
+  jsa_programt &prog,
+  const namespacet &ns,
+  goto_functionst &gf,
+  goto_programt::targett pos,
+  const bool full_query=false)
 {
   goto_programt &body=get_entry_body(gf);
   pos=insert_before_preserve_labels(body, pos);
@@ -71,48 +79,51 @@ void make_query_call(jsa_programt &prog, const symbol_tablet &st,
   pos->source_location=jsa_builtin_source_location();
   code_function_callt call;
   call.function()=
-      st.lookup(full_query ? EXEC_FULL : JSA_QUERY_EXEC).symbol_expr();
+    ns.lookup(full_query ? EXEC_FULL : JSA_QUERY_EXEC).symbol_expr();
   code_function_callt::argumentst &args=call.arguments();
-  args.push_back(address_of_exprt(get_queried_heap(st)));
-  const symbol_exprt p(st.lookup(get_cegis_meta_name(JSA_QUERY)).symbol_expr());
+  args.push_back(address_of_exprt(get_queried_heap(ns)));
+  const symbol_exprt p(
+    ns.lookup(get_cegis_meta_name(JSA_QUERY)).symbol_expr());
   constant_exprt zero=from_integer(0, signed_int_type());
   args.push_back(address_of_exprt(index_exprt(p, zero)));
-  args.push_back(st.lookup(get_cegis_meta_name(JSA_QUERY_SZ)).symbol_expr());
+  args.push_back(ns.lookup(get_cegis_meta_name(JSA_QUERY_SZ)).symbol_expr());
   pos->code=call;
 }
 
-void make_sync_call(const symbol_tablet &st, goto_functionst &gf,
-    goto_programt::targett pos)
+void make_sync_call(
+  const namespacet &ns,
+  goto_functionst &gf,
+  goto_programt::targett pos)
 {
   goto_programt &body=get_entry_body(gf);
   pos=insert_before_preserve_labels(body, pos);
   pos->type=goto_program_instruction_typet::FUNCTION_CALL;
   pos->source_location=jsa_builtin_source_location();
   code_function_callt call;
-  call.function()=st.lookup(SYNC).symbol_expr();
+  call.function()=ns.lookup(SYNC).symbol_expr();
   code_function_callt::argumentst &args=call.arguments();
   args.push_back(address_of_exprt(get_user_heap(gf)));
-  args.push_back(address_of_exprt(get_queried_heap(st)));
-  const symbol_exprt p(st.lookup(get_cegis_meta_name(JSA_QUERY)).symbol_expr());
+  args.push_back(address_of_exprt(get_queried_heap(ns)));
+  const symbol_exprt p(ns.lookup(get_cegis_meta_name(JSA_QUERY)).symbol_expr());
   constant_exprt zero=from_integer(0, signed_int_type());
   args.push_back(address_of_exprt(index_exprt(p, zero)));
-  args.push_back(st.lookup(get_cegis_meta_name(JSA_QUERY_SZ)).symbol_expr());
+  args.push_back(ns.lookup(get_cegis_meta_name(JSA_QUERY_SZ)).symbol_expr());
   pos->code=call;
 }
 }
 
 void execute_jsa_learn_programs(jsa_programt &prog)
 {
-  const symbol_tablet &st=prog.st;
+  const namespacet ns(prog.st);
   goto_functionst &gf=prog.gf;
-  make_constraint_call(st, gf, prog.base_case);
-  make_query_call(prog, st, gf, prog.base_case);
-  make_constraint_call(st, gf, prog.inductive_assumption);
-  make_query_call(prog, st, gf, prog.inductive_assumption);
-  make_constraint_call(st, gf, prog.inductive_step);
-  make_sync_call(st, gf, prog.inductive_step);
-  make_query_call(prog, st, gf, prog.inductive_step);
-  make_constraint_call(st, gf, prog.property_entailment);
-  make_query_call(prog, st, gf, prog.property_entailment, true);
-  make_sync_call(st, gf, prog.property_entailment);
+  make_constraint_call(ns, gf, prog.base_case);
+  make_query_call(prog, ns, gf, prog.base_case);
+  make_constraint_call(ns, gf, prog.inductive_assumption);
+  make_query_call(prog, ns, gf, prog.inductive_assumption);
+  make_constraint_call(ns, gf, prog.inductive_step);
+  make_sync_call(ns, gf, prog.inductive_step);
+  make_query_call(prog, ns, gf, prog.inductive_step);
+  make_constraint_call(ns, gf, prog.property_entailment);
+  make_query_call(prog, ns, gf, prog.property_entailment, true);
+  make_sync_call(ns, gf, prog.property_entailment);
 }

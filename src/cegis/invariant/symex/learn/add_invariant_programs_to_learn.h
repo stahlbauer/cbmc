@@ -17,39 +17,46 @@ Author: Daniel Kroening, kroening@kroening.com
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param decl
  */
-std::string get_prog_var_name(const symbol_tablet &st,
-    const goto_programt::targett &decl);
+std::string get_prog_var_name(
+  const namespacet &ns,
+  const goto_programt::targett &decl);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param max_solution_size
  * @param decl
  * @param prog_base_name
  */
-void execute_inv_prog(const symbol_tablet &st, goto_functionst &gf,
-    size_t max_solution_size, const goto_programt::targett &decl,
-    const std::string &prog_base_name);
+void execute_inv_prog(
+  const namespacet &ns,
+  goto_functionst &gf,
+  size_t max_solution_size,
+  const goto_programt::targett &decl,
+  const std::string &prog_base_name);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param max_solution_size
  * @param decl
  */
-void execute_inv_prog(const symbol_tablet &st, goto_functionst &gf,
-    size_t max_solution_size, const goto_programt::targett &decl);
+void execute_inv_prog(
+  const namespacet &ns,
+  goto_functionst &gf,
+  size_t max_solution_size,
+  const goto_programt::targett &decl);
 
 /**
  * @brief

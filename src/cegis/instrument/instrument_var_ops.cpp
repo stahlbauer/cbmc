@@ -92,10 +92,13 @@ null_pointer_exprt get_null()
 }
 }
 
-void link_user_program_variable_ops(const symbol_tablet &st,
-    class goto_functionst &gf, const operand_variable_idst &var_ids,
-    const is_op_variablet is_op_variable, const goto_programt::targett begin,
-    const goto_programt::targett end)
+void link_user_program_variable_ops(
+  const namespacet &ns,
+  class goto_functionst &gf,
+  const operand_variable_idst &var_ids,
+  const is_op_variablet is_op_variable,
+  const goto_programt::targett begin,
+  const goto_programt::targett end)
 {
   operand_variable_idst to_instrument(var_ids);
   goto_programt &body=get_entry_body(gf);
@@ -109,12 +112,14 @@ void link_user_program_variable_ops(const symbol_tablet &st,
     const goto_program_instruction_typet type=instr.type;
     if (DECL != type && DEAD != type) continue;
     const irep_idt &name=get_affected_variable(instr);
-    if (!is_op_variable(name, st.lookup(name).type)) continue;
+    if(!is_op_variable(name, ns.lookup(name).type))
+      continue;
     const operand_variable_idst::const_iterator id=var_ids.find(name);
-    if (DEAD == type) set_ops_reference(st, body, it, get_null(), id->second);
+    if(DEAD == type)
+      set_ops_reference(ns, body, it, get_null(), id->second);
     else
     {
-      set_ops_reference(st, body, it, name, id->second);
+      set_ops_reference(ns, body, it, name, id->second);
       to_instrument.erase(id->first);
     }
   }
@@ -123,54 +128,71 @@ void link_user_program_variable_ops(const symbol_tablet &st,
   const itt first=to_instrument.begin();
   for (itt it=first; it != to_instrument.end(); ++it)
   {
-    pos=set_ops_reference(st, body, pos, it->first, it->second);
+    pos=set_ops_reference(ns, body, pos, it->first, it->second);
     if (first == it) move_labels(body, begin, pos);
   }
 }
 
-void link_user_program_variable_ops(const symbol_tablet &st,
-    class goto_functionst &gf, const operand_variable_idst &var_ids,
-    const goto_programt::targett begin, const goto_programt::targett end)
+void link_user_program_variable_ops(
+  const namespacet &ns,
+  class goto_functionst &gf,
+  const operand_variable_idst &var_ids,
+  const goto_programt::targett begin,
+  const goto_programt::targett end)
 {
   const is_op_variablet filter=&is_instrumentable_user_variable;
-  link_user_program_variable_ops(st, gf, var_ids, filter, begin, end);
+  link_user_program_variable_ops(ns, gf, var_ids, filter, begin, end);
 }
 
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const char * const ops_array, const exprt &rhs, const unsigned int id)
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const char * const ops_array,
+  const exprt &rhs,
+  const unsigned int id)
 {
   const goto_programt::targett target=body.insert_after(pos);
   goto_programt::instructiont &set_op=*target;
   set_op.type=ASSIGN;
   set_op.source_location=default_cegis_source_location();
   const constant_exprt index(from_integer(id, unsigned_int_type()));
-  const symbol_exprt ops(st.lookup(ops_array).symbol_expr());
+  const symbol_exprt ops(ns.lookup(ops_array).symbol_expr());
   const index_exprt op(ops, index);
   set_op.code=code_assignt(op, rhs);
   return target;
 }
 
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const char * const ops_array, const irep_idt &name, const unsigned int id)
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const char * const ops_array,
+  const irep_idt &name,
+  const unsigned int id)
 {
-  const symbol_exprt rhs(st.lookup(name).symbol_expr());
-  return set_ops_reference(st, body, pos, ops_array, address_of_exprt(rhs), id);
+  const symbol_exprt rhs(ns.lookup(name).symbol_expr());
+  return set_ops_reference(ns, body, pos, ops_array, address_of_exprt(rhs), id);
 }
 
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos, const exprt &rhs,
-    const unsigned int id)
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const exprt &rhs,
+  const unsigned int id)
 {
-  return set_ops_reference(st, body, pos, CEGIS_OPS, rhs, id);
+  return set_ops_reference(ns, body, pos, CEGIS_OPS, rhs, id);
 }
 
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const irep_idt &name, const unsigned int id)
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const irep_idt &name,
+  const unsigned int id)
 {
-  return set_ops_reference(st, body, pos, CEGIS_OPS, name, id);
+  return set_ops_reference(ns, body, pos, CEGIS_OPS, name, id);
 }
 
 source_locationt default_cegis_source_location()

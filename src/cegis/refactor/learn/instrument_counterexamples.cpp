@@ -80,26 +80,29 @@ void create_ce_array_indexes(const std::set<irep_idt> &ce_keys,
   pos=init;
   const source_locationt &loc=pos->source_location;
   const irep_idt &function=pos->function;
+  const namespacet ns(st);
   for (const irep_idt &key : ce_keys)
   {
     const std::string name(get_ce_value_index_name(key));
     declare_global_meta_variable(st, name, zero.type());
-    pos=cegis_assign(st, body, pos, st.lookup(name).symbol_expr(), zero, loc);
+    pos=cegis_assign(ns, body, pos, ns.lookup(name).symbol_expr(), zero, loc);
     pos->function=function;
   }
   body.instructions.erase(init);
 }
 
-void add_ce_goto(const symbol_tablet &st, goto_functionst &gf,
-    const size_t num_ces)
+void add_ce_goto(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const size_t num_ces)
 {
   goto_programt &body=get_body(gf, CONSTRAINT_CALLER_ID);
   goto_programt::targett pos=find_last_instr(body);
   const source_locationt &loc=pos->source_location;
   const irep_idt &function=pos->function;
-  const symbol_exprt ce_index(st.lookup(CE_ARRAY_INDEX).symbol_expr());
+  const symbol_exprt ce_index(ns.lookup(CE_ARRAY_INDEX).symbol_expr());
   const plus_exprt rhs(ce_index, from_integer(1, ce_index.type()));
-  pos=cegis_assign(st, body, pos, ce_index, rhs, loc);
+  pos=cegis_assign(ns, body, pos, ce_index, rhs, loc);
   pos->function=function;
   pos=insert_after_preserving_source_location(body, pos);
   pos->type=goto_program_instruction_typet::GOTO;
@@ -112,42 +115,49 @@ void add_ce_goto(const symbol_tablet &st, goto_functionst &gf,
   body.compute_target_numbers();
 }
 
-const index_exprt get_array_val_expr(const symbol_tablet &st,
-    const irep_idt &loc)
+const index_exprt get_array_val_expr(
+  const namespacet &ns,
+  const irep_idt &loc)
 {
-  const symbol_exprt index(st.lookup(CE_ARRAY_INDEX).symbol_expr());
-  const symbol_exprt array(st.lookup(get_ce_array_name(loc)).symbol_expr());
+  const symbol_exprt index(ns.lookup(CE_ARRAY_INDEX).symbol_expr());
+  const symbol_exprt array(ns.lookup(get_ce_array_name(loc)).symbol_expr());
   const index_exprt ce(array, index);
   const std::string value_index(get_ce_value_index_name(loc));
-  const symbol_exprt value_index_expr(st.lookup(value_index).symbol_expr());
+  const symbol_exprt value_index_expr(ns.lookup(value_index).symbol_expr());
   return index_exprt(ce, value_index_expr);
 }
 
-void assign_ce_values(symbol_tablet &st, goto_functionst &gf,
-    const refactor_programt::counterexample_locationst &ce_locs)
+void assign_ce_values(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const refactor_programt::counterexample_locationst &ce_locs)
 {
   for (const refactor_programt::counterexample_locationst::value_type ce_loc : ce_locs)
   {
     for (goto_programt::targett pos : ce_loc.second)
     {
       const irep_idt &label=get_counterexample_marker(pos);
-      const index_exprt value(get_array_val_expr(st, label));
+      const index_exprt value(get_array_val_expr(ns, label));
       switch (pos->type)
       {
       case ASSIGN:
         to_code_assign(pos->code).rhs()=value;
         break;
       case DECL:
-        pos=cegis_assign(st, gf, pos,
-            st.lookup(get_affected_variable(*pos)).symbol_expr(), value);
+        pos=
+          cegis_assign(
+            ns,
+            gf,
+            pos,
+            ns.lookup(get_affected_variable(*pos)).symbol_expr(), value);
         break;
       default:
         assert(!"Unsupported counterexample location type.");
       }
       const std::string value_index_name(get_ce_value_index_name(label));
-      const symbol_exprt value_index(st.lookup(value_index_name).symbol_expr());
+      const symbol_exprt value_index(ns.lookup(value_index_name).symbol_expr());
       const plus_exprt inc(value_index, from_integer(1, value_index.type()));
-      cegis_assign(st, gf, pos, value_index, inc);
+      cegis_assign(ns, gf, pos, value_index, inc);
     }
   }
 }
@@ -166,6 +176,7 @@ void instrument_counterexamples(refactor_programt &prog,
   normalise(all_keys, zeroes, ces);
   create_ce_arrays(st, gf, ces);
   create_ce_array_indexes(all_keys, st, gf);
-  add_ce_goto(st, gf, ces.size());
-  assign_ce_values(st, gf, ce_locs);
+  const namespacet ns(st);
+  add_ce_goto(ns, gf, ces.size());
+  assign_ce_values(ns, gf, ce_locs);
 }

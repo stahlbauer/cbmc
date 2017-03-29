@@ -73,13 +73,14 @@ void convert(goto_programt::instructionst &result, const jsa_programt &prog,
   std::vector<__CPROVER_jsa_query_instructiont>::const_iterator instr=solution.begin();
   const __CPROVER_jsa_query_instructiont &prefix=*instr++;
   copy_instructionst copy;
+  const namespacet ns(prog.st);
   for (; instr != solution.end(); ++instr)
   {
     const instruction_sett::const_iterator it=instr_set.begin();
     const size_t previous_size=result.size();
     copy(result, it->second);
     const goto_programt::targett new_instr(std::next(result.begin(), previous_size));
-    replace_query_ops(prog.st, new_instr, result.end(), *instr, prefix);
+    replace_query_ops(ns, new_instr, result.end(), *instr, prefix);
   }
   copy.finalize();
 }
@@ -94,9 +95,10 @@ void convert(goto_programt::instructionst &result, const jsa_programt &prog,
   instr.source_location=jsa_builtin_source_location();
   instr.type=goto_program_instruction_typet::FUNCTION_CALL;
   code_function_callt call;
-  call.function()=prog.st.lookup(JSA_INV_VERIFY_EXEC).symbol_expr();
+  const namespacet ns(prog.st);
+  call.function()=ns.lookup(JSA_INV_VERIFY_EXEC).symbol_expr();
   code_function_callt::argumentst &args=call.arguments();
   args.push_back(address_of_exprt(get_user_heap(prog.gf)));
-  args.push_back(address_of_exprt(get_queried_heap(prog.st)));
+  args.push_back(address_of_exprt(get_queried_heap(ns)));
   instr.code=call;
 }

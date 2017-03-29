@@ -37,7 +37,7 @@ public:
 
   void operator()(const danger_programt::loopt &loop)
   {
-    const symbol_tablet &st=prog.st;
+    const namespacet ns(prog.st);
     goto_functionst &gf=prog.gf;
     const danger_programt::danger_meta_vars_positionst &dm=
         loop.danger_meta_variables;
@@ -47,8 +47,8 @@ public:
     {
       const goto_programt::targett rx_prog=*rx.rbegin();
       pos=add_inv_prog(prog, pos, max_sol_sz, rx_prog);
-      const std::string rx_prog_name=get_prog_var_name(st, rx_prog);
-      execute_inv_prog(st, gf, max_sol_sz, *rx_prime.rbegin(), rx_prog_name);
+      const std::string rx_prog_name=get_prog_var_name(ns, rx_prog);
+      execute_inv_prog(ns, gf, max_sol_sz, *rx_prime.rbegin(), rx_prog_name);
     }
     const goto_programt::targetst &sx=dm.Sx;
     if (!sx.empty()) pos=add_inv_prog(prog, pos, max_sol_sz, *sx.rbegin());
@@ -64,7 +64,7 @@ void danger_add_programs_to_learn(danger_programt &prog, const size_t max_sz)
   const declare_danger_programst declare_danger_progs(prog, max_sz, pos);
   std::for_each(loops.begin(), loops.end(), declare_danger_progs);
   const danger_programt::loopt first_loop=*loops.begin();
-  const symbol_tablet &st=prog.st;
-  const std::string D0=get_prog_var_name(st, first_loop.meta_variables.Ix);
-  execute_inv_prog(st, prog.gf, max_sz, prog.Ix0, D0);
+  const namespacet ns(prog.st);
+  const std::string D0=get_prog_var_name(ns, first_loop.meta_variables.Ix);
+  execute_inv_prog(ns, prog.gf, max_sz, prog.Ix0, D0);
 }

@@ -52,12 +52,12 @@ Author: Daniel Kroening, kroening@kroening.com
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param type
  */
 std::string cegis_operand_array_name(
-    const symbol_tablet &st,
-    const typet &type);
+  const namespacet &ns,
+  const typet &type);
 
 /**
  * @brief
@@ -78,15 +78,15 @@ std::string cegis_operand_base_name(size_t op);
  * program[index].op_i
  * @endcode
  *
- * @param st
+ * @param ns
  * @param func_name
  * @param op
  *
  * @return
  */
 member_exprt cegis_opcode(
-    const symbol_tablet &st,
-    const std::string &func_name);
+  const namespacet &ns,
+  const std::string &func_name);
 
 /**
  * @brief
@@ -96,16 +96,16 @@ member_exprt cegis_opcode(
  * program[index].op_i
  * @endcode
  *
- * @param st
+ * @param ns
  * @param func_name
  * @param op
  *
  * @return
  */
 member_exprt cegis_operand_id(
-    const symbol_tablet &st,
-    const std::string &func_name,
-    size_t op);
+  const namespacet &ns,
+  const std::string &func_name,
+  size_t op);
 
 /**
  * @brief
@@ -115,7 +115,7 @@ member_exprt cegis_operand_id(
  * __CPROVER_cegis_variable_array_type[program[index].op_i]
  * @endcode
  *
- * @param st
+ * @param ns
  * @param func_name
  * @param type
  * @param op
@@ -123,10 +123,10 @@ member_exprt cegis_operand_id(
  * @return
  */
 dereference_exprt cegis_operand(
-    const symbol_tablet &st,
-    const std::string &func_name,
-    const typet &type,
-    size_t op);
+  const namespacet &ns,
+  const std::string &func_name,
+  const typet &type,
+  size_t op);
 
 /**
  * @brief

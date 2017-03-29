@@ -33,12 +33,13 @@ goto_programt::targett zero_jsa_temps(jsa_programt &prog,
     goto_programt::targett pos)
 {
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   goto_functionst &gf=prog.gf;
   for (const symbol_tablet::symbolst::value_type &symbol : st.symbols)
   {
     if (!is_tmp(symbol)) continue;
     const symbol_exprt lhs(symbol.second.symbol_expr());
-    pos=jsa_assign(st, gf, pos, lhs, from_integer(0, lhs.type()));
+    pos=jsa_assign(ns, gf, pos, lhs, from_integer(0, lhs.type()));
   }
   return pos;
 }
@@ -46,6 +47,7 @@ goto_programt::targett zero_jsa_temps(jsa_programt &prog,
 void add_zero_jsa_temps_to_pred_exec(jsa_programt &prog)
 {
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   const size_t num_tmps=count_tmps(st);
   assert(num_tmps > 0);
   goto_functionst::function_mapt &fm=prog.gf.function_map;
@@ -70,14 +72,14 @@ void add_zero_jsa_temps_to_pred_exec(jsa_programt &prog)
     if (std::string::npos == id2string(id).find(RETURN_VALUE_SUFFIX)) continue;
     const goto_programt::targett return_pos(pos);
     std::advance(pos, -1);
-    const symbol_exprt ops(st.lookup(JSA_PRED_RES_OPS).symbol_expr());
+    const symbol_exprt ops(ns.lookup(JSA_PRED_RES_OPS).symbol_expr());
     for (size_t i=1; i <= num_tmps; ++i)
     {
       const constant_exprt index(from_integer(i, signed_int_type()));
       const index_exprt elem(ops, index);
       const dereference_exprt lhs(elem, jsa_word_type());
       const exprt rhs(from_integer(0, lhs.type()));
-      pos=cegis_assign(st, body, pos, lhs, rhs, loc);
+      pos=cegis_assign(ns, body, pos, lhs, rhs, loc);
     }
     move_labels(body, return_pos, pos);
     return;

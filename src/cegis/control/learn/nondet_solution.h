@@ -15,11 +15,11 @@ Author: Daniel Kroening, kroening@kroening.com
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  */
 void nondet_control_solution(
-    const class symbol_tablet &st,
-    class goto_functionst &gf);
+  const namespacet &ns,
+  class goto_functionst &gf);
 
 #endif // CPROVER_CEGIS_CONTROL_LEARN_NONDET_SOLUTION_H

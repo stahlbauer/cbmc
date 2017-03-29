@@ -232,7 +232,7 @@ symbolt &create_cegis_symbol(symbol_tablet &st, const std::string &full_name,
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param insert_after_pos
  * @param lhs
@@ -240,30 +240,37 @@ symbolt &create_cegis_symbol(symbol_tablet &st, const std::string &full_name,
  *
  * @return
  */
-goto_programt::targett cegis_assign(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const exprt &lhs, const exprt &rhs);
+goto_programt::targett cegis_assign(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const exprt &lhs,
+  const exprt &rhs);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param instr
  * @param lhs
  * @param rhs
  * @param loc
  */
-void cegis_assign(const symbol_tablet &st, goto_programt::instructiont &instr,
-    const exprt &lhs, const exprt &rhs, const source_locationt &loc);
+void cegis_assign(
+  const namespacet &ns,
+  goto_programt::instructiont &instr,
+  const exprt &lhs,
+  const exprt &rhs,
+  const source_locationt &loc);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param insert_after_pos
  * @param lhs
@@ -272,16 +279,20 @@ void cegis_assign(const symbol_tablet &st, goto_programt::instructiont &instr,
  *
  * @return
  */
-goto_programt::targett cegis_assign(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &insert_after_pos,
-    const exprt &lhs, const exprt &rhs, const source_locationt &loc);
+goto_programt::targett cegis_assign(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &insert_after_pos,
+  const exprt &lhs,
+  const exprt &rhs,
+  const source_locationt &loc);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param insert_after_pos
  * @param lhs
@@ -290,16 +301,20 @@ goto_programt::targett cegis_assign(const symbol_tablet &st,
  *
  * @return
  */
-goto_programt::targett cegis_assign(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const exprt &lhs, const exprt &rhs, const source_locationt &loc);
+goto_programt::targett cegis_assign(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const exprt &lhs,
+  const exprt &rhs,
+  const source_locationt &loc);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param insert_after_pos
  * @param base_name
@@ -307,16 +322,19 @@ goto_programt::targett cegis_assign(const symbol_tablet &st,
  *
  * @return
  */
-goto_programt::targett cegis_assign_user_variable(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const irep_idt &name, const exprt &value);
+goto_programt::targett cegis_assign_user_variable(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const irep_idt &name,
+  const exprt &value);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param insert_after_pos
  * @param func_name
@@ -325,10 +343,13 @@ goto_programt::targett cegis_assign_user_variable(const symbol_tablet &st,
  *
  * @return
  */
-goto_programt::targett cegis_assign_local_variable(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &insert_after_pos,
-    const std::string &func_name, const std::string &var_name,
-    const exprt &value);
+goto_programt::targett cegis_assign_local_variable(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &insert_after_pos,
+  const std::string &func_name,
+  const std::string &var_name,
+  const exprt &value);
 
 /**
  * @brief

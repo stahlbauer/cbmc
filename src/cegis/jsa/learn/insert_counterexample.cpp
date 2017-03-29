@@ -31,8 +31,9 @@ constant_exprt get_size_expr(const size_t size)
 }
 
 typedef std::map<jsa_counterexamplet::key_type, array_exprt> array_valuest;
-array_valuest get_array_values(const symbol_tablet &st,
-    const jsa_counterexamplest &ces)
+array_valuest get_array_values(
+  const namespacet &ns,
+  const jsa_counterexamplest &ces)
 {
   const constant_exprt size_expr(get_size_expr(ces.size()));
   const jsa_counterexamplet &prototype=ces.front();
@@ -40,7 +41,7 @@ array_valuest get_array_values(const symbol_tablet &st,
   for (const jsa_counterexamplet::value_type &value : prototype)
   {
     const typet &org_type=value.second.type();
-    const typet &element_type=replace_struct_by_symbol_type(st, org_type);
+    const typet &element_type=replace_struct_by_symbol_type(ns, org_type);
     const array_typet array_type(element_type, size_expr);
     array_values.insert(std::make_pair(value.first, array_exprt(array_type)));
   }
@@ -60,17 +61,18 @@ void add_array_declarations(jsa_programt &program,
     const jsa_counterexamplest &ces)
 {
   symbol_tablet &st=program.st;
+  const namespacet ns(st);
   goto_functionst &gf=program.gf;
   goto_programt &body=get_entry_body(gf);
   const jsa_counterexamplet &prototype=ces.front();
-  const array_valuest array_values(get_array_values(st, ces));
+  const array_valuest array_values(get_array_values(ns, ces));
   const constant_exprt size_expr(get_size_expr(ces.size()));
   goto_programt::targett &pos=program.synthetic_variables;
   for (const jsa_counterexamplet::value_type &value : prototype)
   {
     const jsa_counterexamplet::value_type::first_type loc_id=value.first;
     const typet &org_type=value.second.type();
-    const typet &element_type=replace_struct_by_symbol_type(st, org_type);
+    const typet &element_type=replace_struct_by_symbol_type(ns, org_type);
     const array_typet array_type(element_type, size_expr);
     const std::string base_name(get_array_name(loc_id));
     pos=body.insert_after(pos);
@@ -79,7 +81,7 @@ void add_array_declarations(jsa_programt &program,
     assert(array_values.end() != array_val);
     const array_exprt &array_expr=array_val->second;
     assert(array_expr.operands().size() == ces.size());
-    pos=assign_jsa_meta_variable(st, gf, pos, base_name, array_val->second);
+    pos=assign_jsa_meta_variable(ns, gf, pos, base_name, array_val->second);
   }
 }
 
@@ -93,12 +95,13 @@ void add_array_index(jsa_programt &prog)
   const typet type(signed_int_type());
   declare_jsa_meta_variable(st, pos, CE_ARRAY_INDEX, type);
   constant_exprt zero=from_integer(0, signed_int_type());
-  pos=assign_jsa_meta_variable(st, gf, pos, CE_ARRAY_INDEX, zero);
+  const namespacet ns(st);
+  pos=assign_jsa_meta_variable(ns, gf, pos, CE_ARRAY_INDEX, zero);
 }
 
-symbol_exprt get_ce_array_index(const symbol_tablet &st)
+symbol_exprt get_ce_array_index(const namespacet &ns)
 {
-  return st.lookup(get_cegis_meta_name(CE_ARRAY_INDEX)).symbol_expr();
+  return ns.lookup(get_cegis_meta_name(CE_ARRAY_INDEX)).symbol_expr();
 }
 
 void add_ce_goto(jsa_programt &prog, const size_t ces_size)
@@ -108,7 +111,8 @@ void add_ce_goto(jsa_programt &prog, const size_t ces_size)
   pos=insert_before_preserve_labels(body, pos);
   pos->source_location=jsa_builtin_source_location();
   pos->type=goto_program_instruction_typet::ASSIGN;
-  const symbol_exprt lhs(get_ce_array_index(prog.st));
+  const namespacet ns(prog.st);
+  const symbol_exprt lhs(get_ce_array_index(ns));
   const typet &type=lhs.type();
   const plus_exprt inc(lhs, from_integer(1, type), type);
   pos->code=code_assignt(lhs, inc);
@@ -125,32 +129,36 @@ void add_ce_goto(jsa_programt &prog, const size_t ces_size)
   body.compute_target_numbers();
 }
 
-const index_exprt get_array_val_expr(const symbol_tablet &st,
-    const irep_idt &loc)
+const index_exprt get_array_val_expr(
+  const namespacet &ns,
+  const irep_idt &loc)
 {
   const std::string index_name(get_cegis_meta_name(CE_ARRAY_INDEX));
-  const symbol_exprt index(st.lookup(index_name).symbol_expr());
+  const symbol_exprt index(ns.lookup(index_name).symbol_expr());
   const std::string array_name(get_cegis_meta_name(get_array_name(loc)));
-  const symbol_exprt array(st.lookup(array_name).symbol_expr());
+  const symbol_exprt array(ns.lookup(array_name).symbol_expr());
   return index_exprt(array, index);
 }
 
 void assign_ce_values(jsa_programt &prog)
 {
-  const symbol_tablet &st=prog.st;
+  const namespacet ns(prog.st);
   goto_functionst &gf=prog.gf;
   for (const goto_programt::targett &pos : prog.counterexample_locations)
   {
     assert(pos->labels.size() == 1u);
-    const index_exprt value(get_array_val_expr(st, pos->labels.front()));
+    const index_exprt value(get_array_val_expr(ns, pos->labels.front()));
     switch (pos->type)
     {
     case ASSIGN:
       to_code_assign(pos->code).rhs()=value;
       break;
     case DECL:
-      jsa_assign(st, gf, pos,
-          st.lookup(get_affected_variable(*pos)).symbol_expr(), value);
+      jsa_assign(
+        ns,
+        gf,
+        pos,
+        ns.lookup(get_affected_variable(*pos)).symbol_expr(), value);
       break;
     default:
       assert(!"Unsupported counterexample location type.");

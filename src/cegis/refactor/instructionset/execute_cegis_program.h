@@ -51,23 +51,23 @@ std::string declare_cegis_program(
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param instr
  * @param processor
  * @param program_name
  */
 void call_processor(
-    const symbol_tablet &st,
-    goto_programt::instructiont &instr,
-    const std::string &processor,
-    const std::string &program_name);
+  const namespacet &ns,
+  goto_programt::instructiont &instr,
+  const std::string &processor,
+  const std::string &program_name);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param processor
@@ -76,11 +76,11 @@ void call_processor(
  * @return
  */
 goto_programt::targett call_processor(
-    const symbol_tablet &st,
-    goto_programt &body,
-    goto_programt::targett pos,
-    const std::string &processor,
-    const std::string &program_name);
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const std::string &processor,
+  const std::string &program_name);
 
 /**
  * @brief
@@ -113,33 +113,33 @@ void set_cegis_processor_sizes(
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param instr
  * @param index
  * @param var_name
  */
 void instrument_cegis_operand(
-    const symbol_tablet &st,
-    goto_programt::instructiont &instr,
-    size_t index,
-    const irep_idt &var_name);
+  const namespacet &ns,
+  goto_programt::instructiont &instr,
+  size_t index,
+  const irep_idt &var_name);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param index
  * @param var_name
  */
 goto_programt::targett instrument_cegis_operand(
-    const symbol_tablet &st,
-    goto_programt &body,
-    goto_programt::targett pos,
-    size_t index,
-    const irep_idt &var_name);
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  size_t index,
+  const irep_idt &var_name);
 
 #endif // CPROVER_CEGIS_REFACTOR_INSTRUCTIONSET_EXECUTE_CEGIS_PROGRAM_H

@@ -27,16 +27,18 @@ public:
   {
   }
 
-  goto_programt::targett operator()(const symbol_tablet &st,
-      const std::string &func_name, goto_programt &body,
-      const goto_programt::targett pos) const
+  goto_programt::targett operator()(
+    const namespacet &ns,
+    const std::string &func_name,
+    goto_programt &body,
+    const goto_programt::targett pos) const
   {
     pos->type=goto_program_instruction_typet::ASSIGN;
     pos->source_location=default_cegis_source_location();
-    const dereference_exprt lhs(cegis_operand(st, func_name, type, 1));
-    const dereference_exprt rhs(cegis_operand(st, func_name, type, 2));
+    const dereference_exprt lhs(cegis_operand(ns, func_name, type, 1));
+    const dereference_exprt rhs(cegis_operand(ns, func_name, type, 2));
     const binary_exprt result(lhs, id, rhs);
-    pos->code=code_assignt(cegis_operand(st, func_name, type, 0), result);
+    pos->code=code_assignt(cegis_operand(ns, func_name, type, 0), result);
     return pos;
   }
 };
@@ -81,14 +83,16 @@ public:
   {
   }
 
-  goto_programt::targett operator()(const symbol_tablet &st,
-      const std::string &func_name, goto_programt &body,
-      goto_programt::targett pos) const
+  goto_programt::targett operator()(
+    const namespacet &ns,
+    const std::string &func_name,
+    goto_programt &body,
+    goto_programt::targett pos) const
   {
     pos->type=goto_program_instruction_typet::ASSIGN;
     pos->source_location=default_cegis_source_location();
-    const dereference_exprt lhs(cegis_operand(st, func_name, type, 0));
-    const dereference_exprt rhs(cegis_operand(st, func_name, type, 1));
+    const dereference_exprt lhs(cegis_operand(ns, func_name, type, 0));
+    const dereference_exprt rhs(cegis_operand(ns, func_name, type, 1));
     pos->code=code_assignt(lhs, rhs);
     return pos;
   }

@@ -196,7 +196,8 @@ void declare_predicates(std::string &result, const size_t num_preds,
 void insert_solution(std::string &result, const jsa_symex_learnt &lcfg)
 {
   const std::string::size_type pos=result.find("  __CPROVER_initialize();\n");
-  const size_t num_preds=get_num_jsa_preds(lcfg.get_symbol_table());
+  const namespacet ns(lcfg.get_symbol_table());
+  const size_t num_preds=get_num_jsa_preds(ns);
   remove_predicates(result, num_preds);
   declare_predicates(result, num_preds, pos);
   remove_line_with(result, "__CPROVER_jsa_query_size;");

@@ -24,12 +24,12 @@ Author: Daniel Kroening, kroening@kroening.com
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param type
  */
 const class typet &replace_struct_by_symbol_type(
-    const class symbol_tablet &st,
-    const typet &type);
+  const class namespacet &ns,
+  const typet &type);
 
 /**
  * @brief

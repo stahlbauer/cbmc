@@ -73,7 +73,8 @@ class body_factoryt
     pos->type=goto_program_instruction_typet::DEAD;
     src_loc(pos);
     const std::string symbol_name(meta_name(name));
-    pos->code=code_deadt(st.lookup(symbol_name).symbol_expr());
+    const namespacet ns(st);
+    pos->code=code_deadt(ns.lookup(symbol_name).symbol_expr());
     return pos;
   }
 
@@ -86,7 +87,8 @@ class body_factoryt
   void decl(const std::string &name, const exprt &value)
   {
     decl(name, value.type());
-    pos=cegis_assign_local_variable(st, body, pos, func_name, name, value);
+    const namespacet ns(st);
+    pos=cegis_assign_local_variable(ns, body, pos, func_name, name, value);
   }
 
   void add_goto(const exprt &guard, const goto_programt::targett &target)
@@ -111,7 +113,8 @@ class body_factoryt
     pos->type=goto_program_instruction_typet::GOTO;
     src_loc(pos);
     const constant_exprt rhs(from_integer(opcode, cegis_size_type()));
-    const member_exprt lhs(cegis_opcode(st, func_name));
+    const namespacet ns(st);
+    const member_exprt lhs(cegis_opcode(ns, func_name));
     pos->guard=binary_relation_exprt(lhs, relation, rhs);
     if (last != last_case) last_case->set_target(pos);
     last_case=pos;
@@ -163,7 +166,8 @@ public:
   void declare_instruction_loop_head()
   {
     decl(CEGIS_PROC_INSTR_INDEX, from_integer(0, cegis_size_type()));
-    const member_exprt opcode(cegis_opcode(st, func_name));
+    const namespacet ns(st);
+    const member_exprt opcode(cegis_opcode(ns, func_name));
     const size_t size(num_instrs(ordered_instructions));
     assume_less(pos=body.insert_after(pos), opcode, size);
     loop_head=pos;
@@ -176,20 +180,22 @@ public:
       pos=std::prev(pos);
     const char * const base_idx_name=CEGIS_PROC_INSTR_INDEX;
     const std::string idx(meta_name(base_idx_name));
-    const symbol_exprt idx_expr(st.lookup(idx).symbol_expr());
+    const namespacet ns(st);
+    const symbol_exprt idx_expr(ns.lookup(idx).symbol_expr());
     const plus_exprt rhs(idx_expr, from_integer(1, idx_expr.type()));
-    cegis_assign_local_variable(st, body, pos, func_name, base_idx_name, rhs);
+    cegis_assign_local_variable(ns, body, pos, func_name, base_idx_name, rhs);
     pos=std::prev(body.instructions.end(), 2);
     const std::string index(meta_name(CEGIS_PROC_INSTR_INDEX));
-    const symbol_exprt index_expr(st.lookup(index).symbol_expr());
+    const symbol_exprt index_expr(ns.lookup(index).symbol_expr());
     const std::string sz(meta_name(CEGIS_PROC_PROGRAM_SIZE_PARAM_ID));
-    const symbol_exprt sz_expr(st.lookup(sz).symbol_expr());
+    const symbol_exprt sz_expr(ns.lookup(sz).symbol_expr());
     const binary_relation_exprt guard(index_expr, ID_lt, sz_expr);
     add_goto(guard, std::next(loop_head));
   }
 
   void add_signature_assumptions()
   {
+    const namespacet ns(st);
     size_t opcode=0;
     for (const ordered_instructionst::value_type &entry : ordered_instructions)
     {
@@ -202,7 +208,7 @@ public:
         if (SKIP != pos->type) pos=body.insert_after(pos);
         const cegis_operand_datat::const_iterator it=slots.find(sig[op]);
         assert(slots.end() != it);
-        const member_exprt operand_id(cegis_operand_id(st, func_name, op));
+        const member_exprt operand_id(cegis_operand_id(ns, func_name, op));
         assume_less(pos, operand_id, it->second);
       }
     }
@@ -213,11 +219,12 @@ public:
   {
     const irep_idt id(ID_notequal);
     size_t opc=0;
+    const namespacet ns(st);
     for (const ordered_instructionst::value_type &entry : ordered_instructions)
       for (const instruction_descriptiont &instr : entry.second)
       {
         const goto_programt::targett it=add_conditional_instr_goto(opc++, id);
-        instr(st, func_name, body, it);
+        instr(ns, func_name, body, it);
       }
     finalise_conditional_instr_gotos();
   }

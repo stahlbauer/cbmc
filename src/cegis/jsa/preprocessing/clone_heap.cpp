@@ -43,34 +43,41 @@ const symbol_exprt &get_user_heap(const goto_functionst &gf)
   return to_symbol_expr(to_code_decl(p->code).symbol());
 }
 
-symbol_exprt get_queried_heap(const symbol_tablet &st)
+symbol_exprt get_queried_heap(const namespacet &ns)
 {
-  return st.lookup(get_cegis_meta_name(JSA_QUERIED_HEAP)).symbol_expr();
+  return ns.lookup(get_cegis_meta_name(JSA_QUERIED_HEAP)).symbol_expr();
 }
 
-symbol_exprt get_org_heap(const symbol_tablet &st)
+symbol_exprt get_org_heap(const namespacet &ns)
 {
-  return st.lookup(get_cegis_meta_name(JSA_ORG_HEAP)).symbol_expr();
+  return ns.lookup(get_cegis_meta_name(JSA_ORG_HEAP)).symbol_expr();
 }
 
 void clone_heap(jsa_programt &prog)
 {
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   goto_functionst &gf=prog.gf;
   goto_programt &body=get_entry_body(gf);
   goto_programt::targett pos=prog.base_case;
   pos=insert_before_preserve_labels(body, pos);
   const symbol_typet heap_type(jsa_heap_type());
   declare_jsa_meta_variable(st, pos, JSA_QUERIED_HEAP, heap_type);
-  jsa_assign(st, gf, pos, get_queried_heap(st), get_user_heap(gf));
+  jsa_assign(ns, gf, pos, get_queried_heap(ns), get_user_heap(gf));
   pos=insert_before_preserve_labels(body, prog.inductive_assumption);
   declare_jsa_meta_variable(st, pos, JSA_ORG_HEAP, heap_type);
-  pos=jsa_assign(st, gf, pos, get_org_heap(st), get_user_heap(gf));
+  pos=jsa_assign(ns, gf, pos, get_org_heap(ns), get_user_heap(gf));
   const side_effect_expr_nondett nondet_heap(heap_type);
-  pos=jsa_assign(st, gf, pos, get_user_heap(gf), nondet_heap);
-  pos=assume_valid_heap(st, body, pos, address_of_exprt(get_user_heap(gf)));
-  jsa_assign(st, gf, pos, get_queried_heap(st), get_org_heap(st));
-  pos=jsa_assign(st, gf, prog.inductive_assumption, get_queried_heap(st), get_org_heap(st));
+  pos=jsa_assign(ns, gf, pos, get_user_heap(gf), nondet_heap);
+  pos=assume_valid_heap(ns, body, pos, address_of_exprt(get_user_heap(gf)));
+  jsa_assign(ns, gf, pos, get_queried_heap(ns), get_org_heap(ns));
+  pos=
+    jsa_assign(
+      ns,
+      gf,
+      prog.inductive_assumption,
+      get_queried_heap(ns),
+      get_org_heap(ns));
 }
 
 #define VALID_LIST JSA_PREFIX "assume_valid_list"
@@ -93,46 +100,56 @@ std::vector<symbol_exprt> collect(goto_programt::targett first,
   return symbols;
 }
 
-goto_programt::targett call_assume(const symbol_tablet &st,
-    const char * const type, const exprt &heap, const exprt &arg,
-    goto_programt &body, const goto_programt::targett &pos)
+goto_programt::targett call_assume(
+  const namespacet &ns,
+  const char * const type,
+  const exprt &heap,
+  const exprt &arg,
+  goto_programt &body,
+  const goto_programt::targett &pos)
 {
   const goto_programt::targett assume=body.insert_after(pos);
   assume->source_location=jsa_builtin_source_location();
   assume->type=goto_program_instruction_typet::FUNCTION_CALL;
   code_function_callt call;
-  call.function()=st.lookup(type).symbol_expr();
+  call.function()=ns.lookup(type).symbol_expr();
   call.arguments().push_back(heap);
   call.arguments().push_back(arg);
   assume->code=call;
   return assume;
 }
 
-goto_programt::targett assume_lists_and_its_valid(const symbol_tablet &st,
-    goto_programt &body, goto_programt::targett pos, const exprt &heap_ptr)
+goto_programt::targett assume_lists_and_its_valid(
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const exprt &heap_ptr)
 {
   const goto_programt::targett first=body.instructions.begin();
   const std::vector<symbol_exprt> its(collect(first, pos, is_jsa_iterator));
   for (const symbol_exprt &it : its)
-    pos=call_assume(st, VALID_IT, heap_ptr, it, body, pos);
+    pos=call_assume(ns, VALID_IT, heap_ptr, it, body, pos);
   const std::vector<symbol_exprt> lists(collect(first, pos, is_jsa_list));
   for (const symbol_exprt &list : lists)
-    pos=call_assume(st, VALID_LIST, heap_ptr, list, body, pos);
+    pos=call_assume(ns, VALID_LIST, heap_ptr, list, body, pos);
   return pos;
 }
 }
 
 #define VALID_HEAP JSA_PREFIX "assume_valid_heap"
 
-goto_programt::targett assume_valid_heap(const symbol_tablet &st,
-    goto_programt &body, goto_programt::targett pos, const exprt &heap_ptr)
+goto_programt::targett assume_valid_heap(
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const exprt &heap_ptr)
 {
   pos=body.insert_after(pos);
   pos->source_location=jsa_builtin_source_location();
   pos->type=goto_program_instruction_typet::FUNCTION_CALL;
   code_function_callt call;
-  call.function()=st.lookup(VALID_HEAP).symbol_expr();
+  call.function()=ns.lookup(VALID_HEAP).symbol_expr();
   call.arguments().push_back(heap_ptr);
   pos->code=call;
-  return assume_lists_and_its_valid(st, body, pos, heap_ptr);
+  return assume_lists_and_its_valid(ns, body, pos, heap_ptr);
 }

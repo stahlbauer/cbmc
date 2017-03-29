@@ -26,6 +26,7 @@ std::string get_name(size_t index)
 
 size_t default_cegis_constant_strategy(symbol_tablet &st, goto_functionst &gf)
 {
+  const namespacet ns(st);
   const std::vector<constant_exprt> literals(collect_integer_literals(st, gf));
   size_t max_word_width=0u;
   size_t const_index=0u;
@@ -39,7 +40,7 @@ size_t default_cegis_constant_strategy(symbol_tablet &st, goto_functionst &gf)
     // XXX: Debug
     const std::string base_name(get_name(const_index++));
     pos=declare_cegis_meta_variable(st, gf, pos, base_name, expr.type());
-    pos=assign_cegis_meta_variable(st, gf, pos, base_name, expr);
+    pos=assign_cegis_meta_variable(ns, gf, pos, base_name, expr);
     max_word_width=std::max(max_word_width, get_min_word_width(expr));
   }
   return max_word_width;

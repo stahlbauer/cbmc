@@ -77,9 +77,10 @@ void create_constraint_function_caller(refactor_programt &prog)
   goto_programt &body=func.body;
   const source_locationt loc(default_cegis_source_location());
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   for (const refactor_programt::sketcht &sketch : prog.sketches)
   {
-    const symbolt &symbol=st.lookup(sketch.init->function);
+    const symbolt &symbol=ns.lookup(sketch.init->function);
     const code_typet &type=to_code_type(symbol.type);
     goto_programt::targett pos=body.add_instruction(
         goto_program_instruction_typet::FUNCTION_CALL);
@@ -135,10 +136,13 @@ void link_refactoring_ranges(goto_programt &body,
   make_skip(second.second, std::prev(instrs.end()));
 }
 
-goto_programt::targett nondet_init(const symbol_tablet &st, goto_programt &body,
-    goto_programt::targett pos, const irep_idt &state_var)
+goto_programt::targett nondet_init(
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const irep_idt &state_var)
 {
-  const symbolt &symbol=st.lookup(state_var);
+  const symbolt &symbol=ns.lookup(state_var);
   if (!is_cegis_primitive(symbol.type)) return pos; // TODO: Handle class types
   pos=insert_after_preserving_source_location(body, pos);
   pos->type=goto_program_instruction_typet::ASSIGN;
@@ -148,12 +152,14 @@ goto_programt::targett nondet_init(const symbol_tablet &st, goto_programt &body,
   return pos;
 }
 
-goto_programt::targett havoc_inputs(const symbol_tablet &st,
-    goto_programt &body, const refactor_programt::sketcht &sketch)
+goto_programt::targett havoc_inputs(
+  const namespacet &ns,
+  goto_programt &body,
+  const refactor_programt::sketcht &sketch)
 {
   goto_programt::targett pos=sketch.init;
   for (const irep_idt &state_var : sketch.state_vars)
-    pos=nondet_init(st, body, pos, state_var);
+    pos=nondet_init(ns, body, pos, state_var);
   return pos;
 }
 
@@ -173,15 +179,16 @@ goto_programt::targett create_snapshot(symbol_tablet &st, goto_programt &body,
     const std::string &func_name, const std::set<irep_idt> &state_vars,
     goto_programt::targett pos, const char * const suffix)
 {
+  const namespacet ns(st);
   for (const irep_idt &state_var : state_vars)
   {
-    const symbolt &symbol=st.lookup(state_var);
+    const symbolt &symbol=ns.lookup(state_var);
     const typet &type=symbol.type;
     if (!is_cegis_primitive(type)) continue; // TODO: Handle class types (clone)
     const std::string clone_name(get_clone_name(symbol.base_name, suffix));
     pos=declare_local_meta_variable(st, func_name, body, pos, clone_name, type);
     const symbol_exprt rhs(symbol.symbol_expr());
-    pos=cegis_assign_local_variable(st, body, pos, func_name, clone_name, rhs);
+    pos=cegis_assign_local_variable(ns, body, pos, func_name, clone_name, rhs);
   }
   return pos;
 }
@@ -206,41 +213,47 @@ goto_programt::targett create_baseline_snapshot(symbol_tablet &st,
 void assign_init_snapshot(symbol_tablet &st, goto_programt &body,
     const refactor_programt::sketcht &sketch, goto_programt::targett pos)
 {
+  const namespacet ns(st);
   const std::string &func=id2string(sketch.init->function);
   for (const irep_idt &var : sketch.state_vars)
   {
-    const symbolt &symbol=st.lookup(var);
+    const symbolt &symbol=ns.lookup(var);
     if (!is_cegis_primitive(symbol.type)) continue; // TODO: Handle class types
     const symbol_exprt lhs(symbol.symbol_expr());
     const irep_idt &base_name=symbol.base_name;
     const std::string rhs_name(get_clone_id(base_name, func, INIT_SUFFIX));
-    const symbol_exprt rhs(st.lookup(rhs_name).symbol_expr());
-    pos=cegis_assign(st, body, pos, lhs, rhs, pos->source_location);
+    const symbol_exprt rhs(ns.lookup(rhs_name).symbol_expr());
+    pos=cegis_assign(ns, body, pos, lhs, rhs, pos->source_location);
   }
 }
 
-equal_exprt equal_to_clone(const symbol_tablet &st, const irep_idt &func_name,
-    const irep_idt &state_var)
+equal_exprt equal_to_clone(
+  const namespacet &ns,
+  const irep_idt &func_name,
+  const irep_idt &state_var)
 {
-  const symbolt &symbol=st.lookup(state_var);
+  const symbolt &symbol=ns.lookup(state_var);
   const symbol_exprt lhs(symbol.symbol_expr());
   const irep_idt &base_name=symbol.base_name;
   const std::string fn(id2string(func_name));
   const std::string clone_var(get_clone_id(base_name, fn, CLONE_SUFFIX));
-  const symbol_exprt rhs(st.lookup(clone_var).symbol_expr());
+  const symbol_exprt rhs(ns.lookup(clone_var).symbol_expr());
   return equal_exprt(lhs, rhs);
 }
 
-void insert_assertion(/*const */symbol_tablet &st, goto_programt &body,
-    const refactor_programt::sketcht &sketch)
+void insert_assertion(
+  const namespacet &ns,
+  goto_programt &body,
+  const refactor_programt::sketcht &sketch)
 {
   const irep_idt &func_name=sketch.init->function;
   exprt::operandst clauses;
   for (const irep_idt &var : sketch.state_vars)
   {
-    if (!is_cegis_primitive(st.lookup(var).type)) continue; // TODO: Handle class types
+    if(!is_cegis_primitive(ns.lookup(var).type))
+      continue; // TODO: Handle class types
     if (is_refactor_meta_var(var)) continue;
-    clauses.push_back(equal_to_clone(st, func_name, var));
+    clauses.push_back(equal_to_clone(ns, func_name, var));
   }
   goto_programt::targett pos=get_second_range(sketch).second;
   pos=insert_after_preserving_source_location(body, pos);
@@ -252,16 +265,17 @@ void insert_assertion(/*const */symbol_tablet &st, goto_programt &body,
 void create_refactoring_constraint(refactor_programt &prog)
 {
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   goto_functionst &gf=prog.gf;
   for (const refactor_programt::sketcht &sketch : prog.sketches)
   {
     goto_programt &body=get_body(gf, sketch.init);
     link_refactoring_ranges(body, sketch);
-    goto_programt::targett pos=havoc_inputs(st, body, sketch);
+    goto_programt::targett pos=havoc_inputs(ns, body, sketch);
     create_init_snapshot(st, body, sketch, pos);
     pos=create_baseline_snapshot(st, body, sketch);
     assign_init_snapshot(st, body, sketch, pos);
-    insert_assertion(st, body, sketch);
+    insert_assertion(ns, body, sketch);
     body.update();
     body.compute_loop_numbers();
   }

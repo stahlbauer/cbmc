@@ -26,17 +26,21 @@ namespace
 const char PROG_SUFFIX[]="_prog";
 }
 
-std::string get_prog_var_name(const symbol_tablet &st,
-    const goto_programt::targett &decl)
+std::string get_prog_var_name(
+  const namespacet &ns,
+  const goto_programt::targett &decl)
 {
-  const irep_idt &base_id=st.lookup(get_affected_variable(*decl)).base_name;
+  const irep_idt &base_id=ns.lookup(get_affected_variable(*decl)).base_name;
   std::string base_name(id2string(base_id));
   return base_name+=PROG_SUFFIX;
 }
 
-void execute_inv_prog(const symbol_tablet &st, goto_functionst &gf,
-    const size_t max_solution_size, const goto_programt::targett &decl,
-    const std::string &prog_base_name)
+void execute_inv_prog(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const size_t max_solution_size,
+  const goto_programt::targett &decl,
+  const std::string &prog_base_name)
 {
   goto_programt &body=get_entry_body(gf);
   goto_programt::targett pos=decl;
@@ -44,9 +48,9 @@ void execute_inv_prog(const symbol_tablet &st, goto_functionst &gf,
   execution->type=goto_program_instruction_typet::FUNCTION_CALL;
   execution->source_location=default_cegis_source_location();
   code_function_callt call;
-  call.function()=st.lookup(DANGER_EXECUTE).symbol_expr();
+  call.function()=ns.lookup(DANGER_EXECUTE).symbol_expr();
   const std::string prog_name(get_cegis_meta_name(prog_base_name));
-  const symbol_exprt prog_symbol(st.lookup(prog_name).symbol_expr());
+  const symbol_exprt prog_symbol(ns.lookup(prog_name).symbol_expr());
   const typet size_type(unsigned_int_type());
   const constant_exprt index(from_integer(0u, size_type));
   const index_exprt first_elem(prog_symbol, index);
@@ -57,11 +61,18 @@ void execute_inv_prog(const symbol_tablet &st, goto_functionst &gf,
   execution->code=call;
 }
 
-void execute_inv_prog(const symbol_tablet &st, goto_functionst &gf,
-    const size_t max_solution_size, const goto_programt::targett &decl)
+void execute_inv_prog(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const size_t max_solution_size,
+  const goto_programt::targett &decl)
 {
-  execute_inv_prog(st, gf, max_solution_size, decl,
-      get_prog_var_name(st, decl));
+  execute_inv_prog(
+    ns,
+    gf,
+    max_solution_size,
+    decl,
+    get_prog_var_name(ns, decl));
 }
 
 goto_programt::targett add_inv_prog(invariant_programt &prog,
@@ -69,14 +80,15 @@ goto_programt::targett add_inv_prog(invariant_programt &prog,
     const goto_programt::targett &decl)
 {
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   goto_functionst &gf=prog.gf;
-  const std::string base_name(get_prog_var_name(st, decl));
+  const std::string base_name(get_prog_var_name(ns, decl));
   const typet size_type(unsigned_int_type());
   const constant_exprt size(from_integer(max_solution_size, size_type));
   const symbol_typet instr_type(CEGIS_INSTRUCTION_TYPE_NAME);
   const array_typet prog_type(instr_type, size);
   pos=declare_cegis_meta_variable(st, gf, pos, base_name, prog_type);
-  execute_inv_prog(st, gf, max_solution_size, decl);
+  execute_inv_prog(ns, gf, max_solution_size, decl);
   return pos;
 }
 
@@ -96,12 +108,12 @@ public:
 
   void operator()(const invariant_programt::invariant_loopt * const loop)
   {
-    const symbol_tablet &st=prog.st;
+    const namespacet ns(prog.st);
     goto_functionst &gf=prog.gf;
     const invariant_programt::meta_vars_positionst &im=loop->meta_variables;
     pos=add_inv_prog(prog, pos, max_solution_size, im.Ix);
-    const std::string dx_prog_name=get_prog_var_name(st, im.Ix);
-    execute_inv_prog(st, gf, max_solution_size, im.Ix_prime, dx_prog_name);
+    const std::string dx_prog_name=get_prog_var_name(ns, im.Ix);
+    execute_inv_prog(ns, gf, max_solution_size, im.Ix_prime, dx_prog_name);
   }
 
   const goto_programt::targett &get_pos() const

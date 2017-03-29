@@ -235,7 +235,7 @@ symbolt &create_local_cegis_symbol(symbol_tablet &st,
   new_symbol.is_file_local=true;
   new_symbol.is_lvalue=true;
   assert(!st.add(new_symbol));
-  return st.lookup(new_symbol.name);
+  return st.get(new_symbol.name);
 }
 
 symbolt &create_cegis_symbol(symbol_tablet &st, const std::string &full_name,
@@ -244,61 +244,81 @@ symbolt &create_cegis_symbol(symbol_tablet &st, const std::string &full_name,
   return create_local_cegis_symbol(st, full_name, full_name, type);
 }
 
-void cegis_assign(const symbol_tablet &st, goto_programt::instructiont &instr,
-    const exprt &lhs, const exprt &rhs, const source_locationt &loc)
+void cegis_assign(
+  const namespacet &ns,
+  goto_programt::instructiont &instr,
+  const exprt &lhs,
+  const exprt &rhs,
+  const source_locationt &loc)
 {
   instr.type=goto_program_instruction_typet::ASSIGN;
   instr.source_location=loc;
-  const namespacet ns(st);
   const typet &type=lhs.type();
   if (type_eq(type, rhs.type(), ns)) instr.code=code_assignt(lhs, rhs);
   else instr.code=code_assignt(lhs, typecast_exprt(rhs, type));
 }
 
-goto_programt::targett cegis_assign(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &insert_after_pos,
-    const exprt &lhs, const exprt &rhs, const source_locationt &loc)
+goto_programt::targett cegis_assign(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &insert_after_pos,
+  const exprt &lhs,
+  const exprt &rhs,
+  const source_locationt &loc)
 {
   const goto_programt::targett assign=body.insert_after(insert_after_pos);
-  cegis_assign(st, *assign, lhs, rhs, loc);
+  cegis_assign(ns, *assign, lhs, rhs, loc);
   return assign;
 }
 
-goto_programt::targett cegis_assign(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const exprt &lhs, const exprt &rhs, const source_locationt &loc)
+goto_programt::targett cegis_assign(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const exprt &lhs,
+  const exprt &rhs,
+  const source_locationt &loc)
 {
   goto_programt &body=get_entry_body(gf);
-  return cegis_assign(st, body, insert_after_pos, lhs, rhs, loc);
+  return cegis_assign(ns, body, insert_after_pos, lhs, rhs, loc);
 }
 
-goto_programt::targett cegis_assign(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const exprt &lhs, const exprt &rhs)
+goto_programt::targett cegis_assign(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const exprt &lhs,
+  const exprt &rhs)
 {
-  return cegis_assign(st, gf, insert_after_pos, lhs, rhs,
+  return cegis_assign(ns, gf, insert_after_pos, lhs, rhs,
       default_cegis_source_location());
 }
 
-goto_programt::targett cegis_assign_user_variable(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const irep_idt &name, const exprt &value)
+goto_programt::targett cegis_assign_user_variable(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const irep_idt &name,
+  const exprt &value)
 {
-  const symbol_exprt lhs(st.lookup(name).symbol_expr());
-  return cegis_assign(st, gf, insert_after_pos, lhs, value);
+  const symbol_exprt lhs(ns.lookup(name).symbol_expr());
+  return cegis_assign(ns, gf, insert_after_pos, lhs, value);
 }
 
-goto_programt::targett cegis_assign_local_variable(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &insert_after_pos,
-    const std::string &func_name, const std::string &var_name,
-    const exprt &value)
+goto_programt::targett cegis_assign_local_variable(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &insert_after_pos,
+  const std::string &func_name,
+  const std::string &var_name,
+  const exprt &value)
 {
   std::string name(func_name);
   name+=NS_SEP;
   name+=var_name;
-  const symbol_exprt lhs(st.lookup(name).symbol_expr());
+  const symbol_exprt lhs(ns.lookup(name).symbol_expr());
   const source_locationt loc(default_cegis_source_location());
-  return cegis_assign(st, body, insert_after_pos, lhs, value, loc);
+  return cegis_assign(ns, body, insert_after_pos, lhs, value, loc);
 }
 
 symbol_exprt get_ret_val_var(const irep_idt &func_id, const typet &type)

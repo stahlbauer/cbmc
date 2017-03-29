@@ -24,12 +24,12 @@ namespace
 {
 class assign_x0t
 {
-  const symbol_tablet &st;
+  const namespacet ns;
   goto_functionst &gf;
   goto_programt::targetst::const_iterator current_choice;
 public:
   explicit assign_x0t(danger_programt &prog) :
-      st(prog.st), gf(prog.gf), current_choice(prog.x0_choices.begin())
+      ns(prog.st), gf(prog.gf), current_choice(prog.x0_choices.begin())
   {
   }
 
@@ -41,7 +41,7 @@ public:
   {
     const goto_programt::targett pos=*current_choice++;
     const irep_idt &var_name=get_affected_variable(*pos);
-    cegis_assign_user_variable(st, gf, pos, var_name, x0_value);
+    cegis_assign_user_variable(ns, gf, pos, var_name, x0_value);
   }
 };
 

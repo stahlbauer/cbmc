@@ -36,12 +36,12 @@ public:
    *
    * @details
    *
-   * @param st
+   * @param ns
    * @param gf
    */
   static void nondeterminise_solution_configuration(
-      class symbol_tablet &st,
-      class goto_functionst &gf);
+    const namespacet &ns,
+    class goto_functionst &gf);
 
   /**
    * @brief

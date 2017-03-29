@@ -119,7 +119,7 @@ const symbolt &declare_global_meta_variable(
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param insert_after_pos
  * @param base_name
@@ -127,9 +127,12 @@ const symbolt &declare_global_meta_variable(
  *
  * @return
  */
-goto_programt::targett assign_cegis_meta_variable(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const std::string &base_name, const exprt &value);
+goto_programt::targett assign_cegis_meta_variable(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const std::string &base_name,
+  const exprt &value);
 
 /**
  * @brief

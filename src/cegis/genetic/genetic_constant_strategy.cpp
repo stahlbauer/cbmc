@@ -60,7 +60,7 @@ size_t genetic_constant_strategy(invariant_programt &prog,
     // XXX: Debug
     const std::string base_name(get_name(const_index++));
     pos=declare_cegis_meta_variable(st, gf, pos, base_name, expr.type());
-    pos=assign_cegis_meta_variable(st, gf, pos, base_name, expr);
+    pos=assign_cegis_meta_variable(ns, gf, pos, base_name, expr);
     max_word_width=std::max(max_word_width, get_min_word_width(expr));
   }
   constants_printed=true;

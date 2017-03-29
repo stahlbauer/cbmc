@@ -77,7 +77,8 @@ public:
     move_labels(body, loop->body.begin, im.Ix);
     const std::string guard(get_Gx(loop_id));
     im.Gx=declare_cegis_meta_variable(st, gf, im.Ix, guard, type);
-    assign_cegis_meta_variable(st, gf, im.Gx, guard, loop->guard);
+    const namespacet ns(st);
+    assign_cegis_meta_variable(ns, gf, im.Gx, guard, loop->guard);
     pos=loop->body.end;
     const std::string x_prime(inv_prime_name(loop_id));
     im.Ix_prime=declare_cegis_meta_variable(st, gf, --pos, x_prime, type);
@@ -93,7 +94,8 @@ void createAx(invariant_programt &program, const typet &type)
   goto_programt::targett pos=program.get_loops().back()->body.begin;
   const std::string base_name(get_Ax());
   program.Ax=declare_cegis_meta_variable(st, gf, --pos, get_Ax(), type);
-  assign_cegis_meta_variable(st, gf, program.Ax, base_name, program.assertion);
+  const namespacet ns(st);
+  assign_cegis_meta_variable(ns, gf, program.Ax, base_name, program.assertion);
 }
 
 void createIx0(invariant_programt &program, const std::string &inv0_name,

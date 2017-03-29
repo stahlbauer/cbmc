@@ -15,54 +15,54 @@ Author: Daniel Kroening, kroening@kroening.com
  *
  * @details
  *
- * @param st
+ * @param ns
  *
  * @return
  */
-const class symbol_typet &control_solution_type(const class symbol_tablet &st);
+const class symbol_typet &control_solution_type(const class namespacet &ns);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  *
  * @return
  */
-const class array_typet &control_vector_solution_type(const class symbol_tablet &st);
+const class array_typet &control_vector_solution_type(const namespacet &ns);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  *
  * @return
  */
-const typet &control_float_value_type(const symbol_tablet &st);
+const typet &control_float_value_type(const namespacet &ns);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  *
  * @return
  */
-const typet &control_array_size_type(const symbol_tablet &st);
+const typet &control_array_size_type(const namespacet &ns);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  *
  * @return
  */
-const typet &control_runtime_array_size_type(const symbol_tablet &st);
+const typet &control_runtime_array_size_type(const namespacet &ns);
 
 #endif // CPROVER_CEGIS_CONTROL_VALUE_CONTROL_TYPES_H

@@ -23,7 +23,8 @@ void declare_cegis_program(symbol_tablet &st, goto_functionst &gf,
 {
   const typet size_type(signed_int_type());
   const constant_exprt sz_expr(from_integer(0, size_type));
-  const code_typet &code_type=to_code_type(st.lookup(processor).type);
+  const namespacet ns(st);
+  const code_typet &code_type=to_code_type(ns.lookup(processor).type);
   const typet &type=code_type.parameters().front().type().subtype();
   const array_typet array_type(type, sz_expr);
   declare_global_meta_variable(st, program_name, array_type);
@@ -46,14 +47,17 @@ const exprt &get_size(const symbolt &prog)
 }
 }
 
-void call_processor(const symbol_tablet &st, goto_programt::instructiont &instr,
-    const std::string &processor, const std::string &program_name)
+void call_processor(
+  const namespacet &ns,
+  goto_programt::instructiont &instr,
+  const std::string &processor,
+  const std::string &program_name)
 {
   instr.type=goto_program_instruction_typet::FUNCTION_CALL;
   code_function_callt call;
-  call.function()=st.lookup(processor).symbol_expr();
+  call.function()=ns.lookup(processor).symbol_expr();
   code_function_callt::argumentst &args=call.arguments();
-  const symbolt &prog_symbol=st.lookup(program_name);
+  const symbolt &prog_symbol=ns.lookup(program_name);
   const symbol_exprt prog(prog_symbol.symbol_expr());
   const index_exprt first_instr(prog, from_integer(0, signed_int_type()));
   args.push_back(address_of_exprt(first_instr));
@@ -64,12 +68,15 @@ void call_processor(const symbol_tablet &st, goto_programt::instructiont &instr,
   instr.source_location=default_cegis_source_location();
 }
 
-goto_programt::targett call_processor(const symbol_tablet &st,
-    goto_programt &body, goto_programt::targett pos,
-    const std::string &processor, const std::string &program_name)
+goto_programt::targett call_processor(
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const std::string &processor,
+  const std::string &program_name)
 {
   pos=body.insert_after(pos);
-  call_processor(st, *pos, processor, program_name);
+  call_processor(ns, *pos, processor, program_name);
   return pos;
 }
 
@@ -104,7 +111,8 @@ void set_cegis_processor_sizes(const symbol_tablet &st,
     if (ID_symbol != func.id()) continue;
     const irep_idt &func_name=to_symbol_expr(func).get_identifier();
     if (!st.has_symbol(func_name)) continue;
-    const symbolt &symbol=st.lookup(func_name);
+    const namespacet ns(st);
+    const symbolt &symbol=ns.lookup(func_name);
     const code_typet &code_type=to_code_type(symbol.type);
     const code_typet::parameterst &params=code_type.parameters();
     if (params.size() != NUM_PROC_CALL_ARGS) continue;
@@ -119,13 +127,15 @@ void set_cegis_processor_sizes(const symbol_tablet &st,
   }
 }
 
-void instrument_cegis_operand(const symbol_tablet &st,
-    goto_programt::instructiont &instr, const size_t index,
-    const irep_idt &var_name)
+void instrument_cegis_operand(
+  const namespacet &ns,
+  goto_programt::instructiont &instr,
+  const size_t index,
+  const irep_idt &var_name)
 {
-  const symbol_exprt var(st.lookup(var_name).symbol_expr());
-  const std::string array_name(cegis_operand_array_name(st, var.type()));
-  const symbol_exprt array(st.lookup(array_name).symbol_expr());
+  const symbol_exprt var(ns.lookup(var_name).symbol_expr());
+  const std::string array_name(cegis_operand_array_name(ns, var.type()));
+  const symbol_exprt array(ns.lookup(array_name).symbol_expr());
   const constant_exprt index_expr(from_integer(index, signed_int_type()));
   const index_exprt lhs(array, index_expr);
   const address_of_exprt rhs(var);
@@ -134,11 +144,14 @@ void instrument_cegis_operand(const symbol_tablet &st,
   instr.code=code_assignt(lhs, rhs);
 }
 
-goto_programt::targett instrument_cegis_operand(const symbol_tablet &st,
-    goto_programt &body, goto_programt::targett pos, size_t index,
-    const irep_idt &var_name)
+goto_programt::targett instrument_cegis_operand(
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  size_t index,
+  const irep_idt &var_name)
 {
   pos=body.insert_after(pos);
-  instrument_cegis_operand(st, *pos, index, var_name);
+  instrument_cegis_operand(ns, *pos, index, var_name);
   return pos;
 }

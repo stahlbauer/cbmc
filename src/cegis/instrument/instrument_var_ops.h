@@ -59,39 +59,45 @@ bool is_instrumentable_user_variable(const irep_idt &id, const typet &type);
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param var_ids
  * @param is_op_variable
  * @param begin
  * @param end
  */
-void link_user_program_variable_ops(const symbol_tablet &st, class goto_functionst &gf,
-    const operand_variable_idst &var_ids, const is_op_variablet is_op_variable,
-    goto_programt::targett begin, goto_programt::targett end);
+void link_user_program_variable_ops(
+  const namespacet &ns,
+  class goto_functionst &gf,
+  const operand_variable_idst &var_ids,
+  const is_op_variablet is_op_variable,
+  goto_programt::targett begin,
+  goto_programt::targett end);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param var_ids
  * @param begin
  * @param end
  */
 void link_user_program_variable_ops(
-    const symbol_tablet &st, class goto_functionst &gf,
-    const operand_variable_idst &var_ids,
-    goto_programt::targett begin, goto_programt::targett end);
+  const namespacet &ns,
+  class goto_functionst &gf,
+  const operand_variable_idst &var_ids,
+  goto_programt::targett begin,
+  goto_programt::targett end);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param name
@@ -99,16 +105,19 @@ void link_user_program_variable_ops(
  *
  * @return
  */
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const irep_idt &name, const unsigned int id);
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const irep_idt &name,
+  const unsigned int id);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param ops_array
@@ -117,16 +126,20 @@ goto_programt::targett set_ops_reference(const symbol_tablet &st,
  *
  * @return
  */
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const char * const ops_array, const irep_idt &name, const unsigned int id);
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const char * const ops_array,
+  const irep_idt &name,
+  const unsigned int id);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param ops_array
@@ -135,16 +148,20 @@ goto_programt::targett set_ops_reference(const symbol_tablet &st,
  *
  * @return
  */
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const char * const ops_array, const exprt &rhs, const unsigned int id);
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const char * const ops_array,
+  const exprt &rhs,
+  const unsigned int id);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param rhs
@@ -152,9 +169,12 @@ goto_programt::targett set_ops_reference(const symbol_tablet &st,
  *
  * @return
  */
-goto_programt::targett set_ops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos, const exprt &rhs,
-    const unsigned int id);
+goto_programt::targett set_ops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const exprt &rhs,
+  const unsigned int id);
 
 
 /**

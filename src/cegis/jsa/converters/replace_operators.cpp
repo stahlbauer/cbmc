@@ -76,22 +76,22 @@ namespace
 {
 class replace_query_ops_visitort: public expr_visitort
 {
-  const symbol_tablet &st;
+  const namespacet &ns;
   const __CPROVER_jsa_query_instructiont &instr;
   const __CPROVER_jsa_query_instructiont &prefix;
   std::vector<exprt *> heap_occurrences;
 public:
-  replace_query_ops_visitort(const symbol_tablet &st,
+  replace_query_ops_visitort(const namespacet &ns,
       const __CPROVER_jsa_query_instructiont &instr,
       const __CPROVER_jsa_query_instructiont &prefix) :
-      st(st), instr(instr), prefix(prefix)
+      ns(ns), instr(instr), prefix(prefix)
   {
   }
 
   ~replace_query_ops_visitort()
   {
     for (exprt * const expr : heap_occurrences)
-      *expr=address_of_exprt(get_queried_heap(st));
+      *expr=address_of_exprt(get_queried_heap(ns));
   }
 
   void handle_member(member_exprt &member_expr)
@@ -124,12 +124,14 @@ public:
 };
 }
 
-void replace_query_ops(const symbol_tablet &st, goto_programt::targett first,
-    const goto_programt::const_targett &last,
-    const __CPROVER_jsa_query_instructiont &instr,
-    const __CPROVER_jsa_query_instructiont &prefix)
+void replace_query_ops(
+  const namespacet &ns,
+  goto_programt::targett first,
+  const goto_programt::const_targett &last,
+  const __CPROVER_jsa_query_instructiont &instr,
+  const __CPROVER_jsa_query_instructiont &prefix)
 {
-  replace_query_ops_visitort visitor(st, instr, prefix);
+  replace_query_ops_visitort visitor(ns, instr, prefix);
   for (; first != last; ++first)
   {
     first->guard.visit(visitor);

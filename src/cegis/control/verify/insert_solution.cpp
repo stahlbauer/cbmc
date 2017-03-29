@@ -36,12 +36,15 @@ exprt &get_comp(struct_exprt::operandst &ops, const struct_typet &struct_type,
   return ops[offset];
 }
 
-void set_array(struct_exprt::operandst &ops, const symbol_tablet &st,
-    const struct_typet &struct_type, const array_exprt &array,
-    const char * const comp)
+void set_array(
+  struct_exprt::operandst &ops,
+  const namespacet &ns,
+  const struct_typet &struct_type,
+  const array_exprt &array,
+  const char * const comp)
 {
   to_array_expr(get_comp(ops, struct_type, comp))=array;
-  const typet &size_type=control_runtime_array_size_type(st);
+  const typet &size_type=control_runtime_array_size_type(ns);
   const constant_exprt size(from_integer(array.operands().size(), size_type));
   const char * const sz_comp=
       std::string(CEGIS_CONTROL_A_MEMBER_NAME) == comp ?
@@ -49,17 +52,18 @@ void set_array(struct_exprt::operandst &ops, const symbol_tablet &st,
   get_comp(ops, struct_type, sz_comp)=size;
 }
 
-struct_exprt to_struct_expr(const symbol_tablet &st,
-    const control_solutiont &solution, const source_locationt &loc)
+struct_exprt to_struct_expr(
+  const namespacet &ns,
+  const control_solutiont &solution,
+  const source_locationt &loc)
 {
-  const symbol_typet &type=control_solution_type(st);
-  const namespacet ns(st);
+  const symbol_typet &type=control_solution_type(ns);
   const struct_typet &struct_type=to_struct_type(ns.follow(type));
   const exprt zero(zero_initializer(type, loc, ns));
   struct_exprt result(to_struct_expr(zero));
   struct_exprt::operandst &ops=result.operands();
-  set_array(ops, st, struct_type, solution.a, CEGIS_CONTROL_A_MEMBER_NAME);
-  set_array(ops, st, struct_type, solution.b, CEGIS_CONTROL_B_MEMBER_NAME);
+  set_array(ops, ns, struct_type, solution.a, CEGIS_CONTROL_A_MEMBER_NAME);
+  set_array(ops, ns, struct_type, solution.b, CEGIS_CONTROL_B_MEMBER_NAME);
   return result;
 }
 }
@@ -69,9 +73,9 @@ void insert_solution(control_programt &program,
 {
   goto_programt &init=get_body(program.gf, CPROVER_INIT);
   const goto_programt::targett pos=get_solution_assignment(init);
-  const symbol_tablet &st=program.st;
+  const namespacet ns(program.st);
   const source_locationt &loc=pos->source_location;
-  to_code_assign(pos->code).rhs()=to_struct_expr(st, solution, loc);
+  to_code_assign(pos->code).rhs()=to_struct_expr(ns, solution, loc);
 }
 
 namespace

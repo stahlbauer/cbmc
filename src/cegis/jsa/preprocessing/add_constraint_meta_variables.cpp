@@ -61,20 +61,27 @@ void declare_jsa_meta_variable(symbol_tablet &st,
   decl->source_location=jsa_builtin_source_location();
 }
 
-goto_programt::targett assign_jsa_meta_variable(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &pos,
-    const std::string &base_name, const exprt &expr_value)
+goto_programt::targett assign_jsa_meta_variable(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &pos,
+  const std::string &base_name,
+  const exprt &expr_value)
 {
   const std::string name(get_cegis_meta_name(base_name));
-  const symbol_exprt lhs(st.lookup(name).symbol_expr());
-  return jsa_assign(st, gf, pos, lhs, expr_value);
+  const symbol_exprt lhs(ns.lookup(name).symbol_expr());
+  return jsa_assign(ns, gf, pos, lhs, expr_value);
 }
 
-goto_programt::targett jsa_assign(const symbol_tablet &st, goto_functionst &gf,
-    const goto_programt::targett &pos, const exprt &lhs, const exprt &rhs)
+goto_programt::targett jsa_assign(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &pos,
+  const exprt &lhs,
+  const exprt &rhs)
 {
   const source_locationt loc(jsa_builtin_source_location());
-  return cegis_assign(st, gf, pos, lhs, rhs, loc);
+  return cegis_assign(ns, gf, pos, lhs, rhs, loc);
 }
 
 void add_jsa_constraint_meta_variables(jsa_programt &p)

@@ -30,7 +30,7 @@ void refactor_symex_verifyt::process(const candidatet &candidate)
   const namespacet ns(st);
   for (const irep_idt &program : current_program.programs)
   {
-    symbolt &symbol=st.lookup(program);
+    symbolt &symbol=st.get(program);
     const candidatet::const_iterator it=candidate.find(program);
     if (candidate.end() == it)
     {

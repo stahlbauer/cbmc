@@ -32,8 +32,10 @@ instruction_descriptiont::typest instruction_descriptiont::operand_types() const
 }
 
 goto_programt::targett instruction_descriptiont::operator()(
-    const symbol_tablet &st, const std::string &func_name, goto_programt &body,
-    goto_programt::targett pos) const
+  const namespacet &ns,
+  const std::string &func_name,
+  goto_programt &body,
+  goto_programt::targett pos) const
 {
-  return factory(st, func_name, body, pos);
+  return factory(ns, func_name, body, pos);
 }

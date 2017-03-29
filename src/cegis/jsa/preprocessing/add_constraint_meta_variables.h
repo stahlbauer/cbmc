@@ -32,36 +32,36 @@ void declare_jsa_meta_variable(
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param pos
  * @param base_name
  * @param expr_value
  */
 goto_programt::targett assign_jsa_meta_variable(
-    const symbol_tablet &st,
-    goto_functionst &gf,
-    const goto_programt::targett &pos,
-    const std::string &base_name,
-    const exprt &expr_value);
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &pos,
+  const std::string &base_name,
+  const exprt &expr_value);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param gf
  * @param pos
  * @param lhs
  * @param rhs
  */
 goto_programt::targett jsa_assign(
-    const symbol_tablet &st,
-    goto_functionst &gf,
-    const goto_programt::targett &pos,
-    const exprt &lhs,
-    const exprt &rhs);
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &pos,
+  const exprt &lhs,
+  const exprt &rhs);
 
 /**
  * @brief

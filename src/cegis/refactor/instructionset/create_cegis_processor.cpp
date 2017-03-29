@@ -61,7 +61,8 @@ namespace
 void create_variable_array(symbol_tablet &st, goto_functionst &gf,
     const typet &type, const size_t size)
 {
-  const std::string name(cegis_operand_array_name(st, type));
+  const namespacet ns(st);
+  const std::string name(cegis_operand_array_name(ns, type));
   if (st.has_symbol(name)) return;
   const typet size_type(signed_int_type());
   const constant_exprt sz_expr(from_integer(size, size_type));
@@ -82,8 +83,7 @@ void create_variable_array(symbol_tablet &st, goto_functionst &gf,
   pos=body.insert_after(pos);
   pos->type=goto_program_instruction_typet::ASSIGN;
   pos->source_location=new_symbol.location;
-  const symbol_exprt lhs(st.lookup(name).symbol_expr());
-  const namespacet ns(st);
+  const symbol_exprt lhs(ns.lookup(name).symbol_expr());
   const exprt rhs(zero_initializer(array_type, new_symbol.location, ns));
   pos->code=code_assignt(lhs, rhs);
   body.update();

@@ -64,15 +64,16 @@ void declare_x_arrays(symbol_tablet &st, goto_functionst &gf,
     const array_exprt &value=it->second;
     const typet &type=value.type();
     pos=declare_cegis_meta_variable(st, gf, pos, base_name, type);
-    pos=assign_cegis_meta_variable(st, gf, pos, base_name, value);
+    const namespacet ns(st);
+    pos=assign_cegis_meta_variable(ns, gf, pos, base_name, value);
   }
 }
 
 const char X_INDEX[]=CEGIS_PREFIX "x_index";
-symbol_exprt get_index(const symbol_tablet &st)
+symbol_exprt get_index(const namespacet &ns)
 {
   const std::string index_name(get_cegis_meta_name(X_INDEX));
-  return st.lookup(index_name).symbol_expr();
+  return ns.lookup(index_name).symbol_expr();
 }
 
 goto_programt::targett find_decl(goto_programt::targett begin,
@@ -86,7 +87,7 @@ goto_programt::targett find_decl(goto_programt::targett begin,
 class assign_ce_valuet
 {
   const invariant_programt &prog;
-  const symbol_tablet &st;
+  const namespacet ns;
   goto_functionst &gf;
   goto_programt::targett pos;
   goto_programt::targett goto_pos;
@@ -97,17 +98,23 @@ public:
   {
     const typet size_type(unsigned_int_type());
     const constant_exprt num_ces(from_integer(ces_size, size_type));
-    const symbol_exprt index(get_index(st));
+    const symbol_exprt index(get_index(ns));
     const equal_exprt cond(index, num_ces);
     pos->guard=cond;
     goto_pos=pos;
   }
 
-  assign_ce_valuet(invariant_programt &prog, const size_t ces_size,
-      const goto_programt::targett begin_pos,
-      const std::string &meta_var_prefix, const bool use_x0_ce) :
-      prog(prog), st(prog.st), gf(prog.gf), meta_var_prefix(meta_var_prefix), use_x0_ce(
-          use_x0_ce)
+  assign_ce_valuet(
+    invariant_programt &prog,
+    const size_t ces_size,
+    const goto_programt::targett begin_pos,
+    const std::string &meta_var_prefix,
+    const bool use_x0_ce):
+    prog(prog),
+    ns(prog.st),
+    gf(prog.gf),
+    meta_var_prefix(meta_var_prefix),
+    use_x0_ce(use_x0_ce)
   {
     const invariant_programt::invariant_loopst loops(prog.get_loops());
     assert(!loops.empty());
@@ -127,14 +134,16 @@ public:
     std::string base_name(meta_var_prefix);
     base_name+=id2string(assignment.first);
     const std::string array_name(get_cegis_meta_name(base_name));
-    const symbol_exprt array(st.lookup(array_name).symbol_expr());
-    const index_exprt rhs(array, get_index(st));
+    const symbol_exprt array(ns.lookup(array_name).symbol_expr());
+    const index_exprt rhs(array, get_index(ns));
     const irep_idt &id=assignment.first;
-    const symbol_exprt lhs(st.lookup(id).symbol_expr());
+    const symbol_exprt lhs(ns.lookup(id).symbol_expr());
     const goto_programt::targett end(prog.invariant_range.end);
     const goto_programt::targett decl(find_decl(pos, end, id));
-    if (end == decl) pos=cegis_assign(st, gf, pos, lhs, rhs);
-    else cegis_assign(st, gf, decl, lhs, rhs);
+    if(end==decl)
+      pos=cegis_assign(ns, gf, pos, lhs, rhs);
+    else
+      cegis_assign(ns, gf, decl, lhs, rhs);
   }
 
   void finalize_x0_case()
@@ -192,14 +201,15 @@ goto_programt::targett invariant_add_ce_loop(invariant_programt &prog,
   const typet size_type(unsigned_int_type());
   pos=declare_cegis_meta_variable(st, gf, --pos, X_INDEX, size_type);
   const constant_exprt first_index(from_integer(0, size_type));
-  pos=assign_cegis_meta_variable(st, gf, pos, X_INDEX, first_index);
+  const namespacet ns(st);
+  pos=assign_cegis_meta_variable(ns, gf, pos, X_INDEX, first_index);
   goto_programt::targett loop_head=pos;
   (++loop_head)->labels.push_back(X_LABEL);
   goto_programt &body=get_entry_body(gf);
   pos=insert_before_preserve_labels(body, prog.invariant_range.end);
   pos->type=goto_program_instruction_typet::ASSIGN;
   pos->source_location=default_cegis_source_location();
-  const symbol_exprt index(get_index(st));
+  const symbol_exprt index(get_index(ns));
   const constant_exprt one(from_integer(1, size_type));
   const code_assignt inc(index, plus_exprt(index, one));
   pos->code=inc;

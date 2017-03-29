@@ -47,8 +47,13 @@ std::function<void(jsa_solutiont &)> get_default_solution(
 }
 
 template<class oraclet, class prept>
-int run_with_ga(const symbol_tablet &st, const optionst &o, mstreamt &result,
-    jsa_symex_learnt &l, oraclet &oracle, prept &prep)
+int run_with_ga(
+  const namespacet &ns,
+  const optionst &o,
+  mstreamt &result,
+  jsa_symex_learnt &l,
+  oraclet &oracle,
+  prept &prep)
 {
   jsa_source_providert source_provider(l);
   dynamic_jsa_test_runnert test_runner(std::ref(source_provider));
@@ -60,7 +65,7 @@ int run_with_ga(const symbol_tablet &st, const optionst &o, mstreamt &result,
   const selectt::test_case_datat &test_case_data=fitness.get_test_case_data();
   const size_t rounds=o.get_unsigned_int_option(CEGIS_ROUNDS);
   const selectt select(test_case_data, rounds);
-  jsa_randomt rnd(st, l.get_pred_ops_count(), l.get_const_pred_ops_count());
+  jsa_randomt rnd(ns, l.get_pred_ops_count(), l.get_const_pred_ops_count());
   const random_jsa_mutatet mutate(rnd);
   const random_jsa_crosst cross(rnd);
   const jsa_genetic_convertt convert(l);
@@ -92,8 +97,9 @@ int run_jsa(optionst &o, mstreamt &result, const symbol_tablet &st,
   cegis_symex_learnt<jsa_preprocessingt, jsa_symex_learnt> learn(o, prep, lcfg, get_default_solution(prog));
   jsa_symex_verifyt vcfg(prog);
   cegis_symex_verifyt<jsa_symex_verifyt> oracle(o, vcfg);
+  const namespacet ns(st);
   if (o.get_bool_option(CEGIS_GENETIC))
-    return run_with_ga(st, o, result, lcfg, oracle, prep);
+    return run_with_ga(ns, o, result, lcfg, oracle, prep);
   else
     return run_cegis_with_statistics_wrapper(result, o, learn, oracle, prep);
 }

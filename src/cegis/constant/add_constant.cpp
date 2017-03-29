@@ -57,8 +57,9 @@ void add_cegis_constant(symbol_tablet &st, goto_functionst &gf,
   typet type=value.type();
   type.set(ID_C_constant, true);
   create_cegis_symbol(st, name, type).value=value;
+  const namespacet ns(st);
   if (!is_empty(value))
-    pos=cegis_assign_user_variable(st, gf, pos, name, value);
+    pos=cegis_assign_user_variable(ns, gf, pos, name, value);
 }
 
 void add_cegis_constant(symbol_tablet &st, goto_functionst &gf,

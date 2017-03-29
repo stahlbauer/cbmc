@@ -52,7 +52,8 @@ public:
     declare_cegis_meta_variable(st, gf, --pos, base_name, type);
     const std::string full_name(get_cegis_meta_name(base_name));
     const symbol_exprt placeholder(full_name, type);
-    cegis_assign_user_variable(st, gf, target, x0_name, placeholder);
+    const namespacet ns(st);
+    cegis_assign_user_variable(ns, gf, target, x0_name, placeholder);
   }
 };
 }

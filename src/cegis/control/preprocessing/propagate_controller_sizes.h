@@ -77,7 +77,7 @@ const array_exprt &get_b_controller_comp(
  * @param gf
  */
 void propagate_controller_sizes(
-    const class symbol_tablet &st,
+    const symbol_tablet &st,
     class goto_functionst &gf);
 
 /**

@@ -105,9 +105,9 @@ public:
 void propagate_controller_sizes(const symbol_tablet &st, goto_functionst &gf)
 {
   if (!st.has_symbol(CEGIS_CONTROL_SOLUTION_VAR_NAME)) return;
-  const symbolt &symbol=st.lookup(CEGIS_CONTROL_SOLUTION_VAR_NAME);
-  const struct_exprt &controller_value=to_struct_expr(symbol.value);
   const namespacet ns(st);
+  const symbolt &symbol=ns.lookup(CEGIS_CONTROL_SOLUTION_VAR_NAME);
+  const struct_exprt &controller_value=to_struct_expr(symbol.value);
   const exprt &a_size=get_a_size(ns, controller_value);
   const exprt &b_size=get_b_size(ns, controller_value);
   replace_sizes_visitort visitor(a_size, b_size);

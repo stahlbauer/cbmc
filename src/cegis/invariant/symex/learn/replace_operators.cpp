@@ -21,7 +21,6 @@ const char OP2_SUFFIX[]="::1::1::1::op2";
 class replace_ops_visitort: public expr_visitort
 {
 private:
-  const symbol_tablet &st;
   const namespacet ns;
   const std::string rop_name;
   const std::string op0_name;
@@ -38,7 +37,7 @@ public:
       const invariant_variable_namest &names, const invariant_variable_namest &rnames,
       const size_t op0, const size_t op1, const size_t op2,
       const size_t instr_idx) :
-      st(st), ns(st), rop_name(func_name + ROP_SUFFIX), op0_name(
+      ns(st), rop_name(func_name + ROP_SUFFIX), op0_name(
           func_name + OP0_SUFFIX), op1_name(func_name + OP1_SUFFIX), op2_name(
           func_name + OP2_SUFFIX), names(names), rnames(rnames), op0(op0), op1(
           op1), op2(op2), instr_idx(instr_idx)
@@ -65,7 +64,7 @@ public:
     const size_t op=is_res ? instr_idx : is_op0 ? op0 : is_op1 ? op1 : op2;
     const invariant_variable_namest::const_iterator name=names.find(op);
     assert(names.end() != name);
-    const symbol_exprt symbol(st.lookup(name->second).symbol_expr());
+    const symbol_exprt symbol(ns.lookup(name->second).symbol_expr());
     const typet danger_type(cegis_default_integer_type());
     if (type_eq(danger_type, symbol.type(), ns)) expr=symbol;
     else expr=typecast_exprt(symbol, danger_type); // XXX: Change if operations for other types are added.

@@ -18,9 +18,10 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <cegis/control/learn/rational_solution_configuration.h>
 
 void rational_solution_configurationt::nondeterminise_solution_configuration(
-    symbol_tablet &st, goto_functionst &gf)
+  const namespacet &ns,
+  goto_functionst &gf)
 {
-  nondet_control_solution(st, gf);
+  nondet_control_solution(ns, gf);
 }
 
 namespace

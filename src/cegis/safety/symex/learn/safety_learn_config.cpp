@@ -49,13 +49,14 @@ void safety_learn_configt::process(const counterexamplest &ces,
   goto_functionst &gf=program.gf;
   add_cegis_library(st, gf, msg, num_vars, num_consts, max_sz, name);
   add_safety_learning_variable_refs(program, var_ids, max_sz);
-  link_result_var(st, gf, var_ids.size(), max_sz, program.Ix0);
+  const namespacet ns(st);
+  link_result_var(ns, gf, var_ids.size(), max_sz, program.Ix0);
   add_invariant_progs_to_learn(program, max_sz);
   const invariant_programt &prog=program;
   const invariant_programt::const_invariant_loopst loops(prog.get_loops());
   const invariant_programt::invariant_loopt &first_loop=*loops.front();
-  const std::string I0=get_prog_var_name(st, first_loop.meta_variables.Ix);
-  execute_inv_prog(st, gf, max_sz, program.Ix0, I0);
+  const std::string I0=get_prog_var_name(ns, first_loop.meta_variables.Ix);
+  execute_inv_prog(ns, gf, max_sz, program.Ix0, I0);
   safety_add_learned_counterexamples(program, ces, create_safety_constraint);
   gf.update();
 }

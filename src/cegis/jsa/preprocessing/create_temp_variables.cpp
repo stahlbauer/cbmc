@@ -21,6 +21,7 @@ void create_jsa_temp_variables(jsa_programt &prog, const size_t max_size)
 {
   goto_programt::targett pos=prog.synthetic_variables;
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   goto_functionst &gf=prog.gf;
   goto_programt &body=get_entry_body(gf);
   const std::string tmp_prefix(JSA_TMP_PREFIX);
@@ -30,7 +31,8 @@ void create_jsa_temp_variables(jsa_programt &prog, const size_t max_size)
     pos=body.insert_after(pos);
     const std::string base_name(tmp_prefix + std::to_string(i));
     declare_jsa_meta_variable(st, pos, base_name, type);
-    pos=assign_jsa_meta_variable(st, gf, pos, base_name, from_integer(0, type));
+    pos=
+      assign_jsa_meta_variable(ns, gf, pos, base_name, from_integer(0, type));
   }
   prog.synthetic_variables=pos;
 }

@@ -30,7 +30,8 @@ bool is_assignment_to_solution_var(const goto_programt::instructiont &instr)
 }
 
 void vector_solution_configurationt::nondeterminise_solution_configuration(
-    symbol_tablet &st, goto_functionst &gf)
+  const namespacet &ns,
+  goto_functionst &gf)
 {
   goto_programt &init_body=get_body(gf, CPROVER_INIT);
   goto_programt::instructionst &init_instrs=init_body.instructions;

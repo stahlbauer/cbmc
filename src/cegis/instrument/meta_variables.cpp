@@ -81,12 +81,15 @@ void declare_local_meta_variable(symbol_tablet &st, const std::string &fn,
   declare_local_var(instr, smb);
 }
 
-goto_programt::targett assign_cegis_meta_variable(const symbol_tablet &st,
-    goto_functionst &gf, const goto_programt::targett &insert_after_pos,
-    const std::string &base_name, const exprt &value)
+goto_programt::targett assign_cegis_meta_variable(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const goto_programt::targett &insert_after_pos,
+  const std::string &base_name,
+  const exprt &value)
 {
   const std::string name(get_cegis_meta_name(base_name));
-  return cegis_assign_user_variable(st, gf, insert_after_pos, name, value);
+  return cegis_assign_user_variable(ns, gf, insert_after_pos, name, value);
 }
 
 typet cegis_default_integer_type()
@@ -123,7 +126,8 @@ const symbolt &declare_global_meta_variable(symbol_tablet &st,
   new_symbol.is_static_lifetime=true;
   new_symbol.is_state_var=true;
   assert(!st.add(new_symbol));
-  return st.lookup(name);
+  const namespacet ns(st);
+  return ns.lookup(name);
 }
 
 const symbolt &declare_global_meta_variable(symbol_tablet &st,
@@ -135,6 +139,7 @@ const symbolt &declare_global_meta_variable(symbol_tablet &st,
   goto_programt::targett pos=instrs.begin();
   if (instrs.size() >= 2) pos=std::prev(init_body.instructions.end(), 2);
   const symbol_exprt lhs(symbol.symbol_expr());
-  cegis_assign(st, init_body, pos, lhs, value, default_cegis_source_location());
+  const namespacet ns(st);
+  cegis_assign(ns, init_body, pos, lhs, value, default_cegis_source_location());
   return symbol;
 }

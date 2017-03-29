@@ -33,17 +33,17 @@ void replace_pred_ops(
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param first
  * @param last
  * @param instr
  * @param prefix
  */
 void replace_query_ops(
-    const class symbol_tablet &st,
-    goto_programt::targett first,
-    const goto_programt::const_targett &last,
-    const __CPROVER_jsa_query_instructiont &instr,
-    const __CPROVER_jsa_query_instructiont &prefix);
+  const namespacet &ns,
+  goto_programt::targett first,
+  const goto_programt::const_targett &last,
+  const __CPROVER_jsa_query_instructiont &instr,
+  const __CPROVER_jsa_query_instructiont &prefix);
 
 #endif // CPROVER_CEGIS_JSA_CONVERTERS_REPLACE_OPERATORS_H

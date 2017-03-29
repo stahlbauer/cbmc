@@ -90,13 +90,13 @@ void safety_fitness_configt::set_test_case(const counterexamplet &ce)
     const irep_idt &var=get_affected_variable(*quantifier);
     const counterexamplet::const_iterator it=ass.find(var);
     if (ass.end() == it) continue;
-    symbol_tablet &st=program.st;
     if (program_contains_ce)
     {
       goto_programt::targett assignment=quantifier;
       erase_target(get_entry_body(gf).instructions, ++assignment);
     }
-    cegis_assign_user_variable(st, gf, quantifier, var, it->second);
+    const namespacet ns(program.st);
+    cegis_assign_user_variable(ns, gf, quantifier, var, it->second);
   }
   gf.update();
   program_contains_ce=true;

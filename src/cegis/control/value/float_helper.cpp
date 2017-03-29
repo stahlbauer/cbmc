@@ -33,9 +33,9 @@ double to_control_float(const constant_exprt &expr)
   return ieee_float.to_double();
 }
 
-exprt to_control_float_expr(const symbol_tablet &st, double value)
+exprt to_control_float_expr(const namespacet &ns, double value)
 {
-  const typet &data_type=control_float_value_type(st);
+  const typet &data_type=control_float_value_type(ns);
   if (ID_fixedbv == data_type.id())
   {
     const fixedbv_spect spec(to_fixedbv_type(data_type));
@@ -53,6 +53,7 @@ exprt to_control_float_expr(const symbol_tablet &st, double value)
   ieee_floatt ieee(ieee_float_spect::double_precision());
   ieee.from_double(value);
   const exprt result(ieee.to_expr());
-  if (type_eq(result.type(), data_type, namespacet(st))) return result;
+  if(type_eq(result.type(), data_type, ns))
+    return result;
   return typecast_exprt(result, data_type);
 }

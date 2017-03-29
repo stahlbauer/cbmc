@@ -15,7 +15,8 @@ void control_symex_learnt<solution_configt>::process(
   current_program=original_program;
   symbol_tablet &st=current_program.st;
   goto_functionst &gf=current_program.gf;
-  solution_configt::nondeterminise_solution_configuration(st, gf);
+  const namespacet ns(st);
+  solution_configt::nondeterminise_solution_configuration(ns, gf);
   transform_asserts_to_assumes(gf);
   const goto_programt::targetst &ce_locs=
       current_program.counterexample_locations;

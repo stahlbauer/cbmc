@@ -35,7 +35,7 @@ bool is_const(const symbol_exprt &symbol_expr)
 
 void add_inductive_step_renondets(jsa_programt &prog)
 {
-  const symbol_tablet &st=prog.st;
+  const namespacet ns(prog.st);
   goto_functionst &gf=prog.gf;
   goto_programt::instructionst &body=get_entry_body(gf).instructions;
   const goto_programt::targett last=prog.base_case;
@@ -45,10 +45,10 @@ void add_inductive_step_renondets(jsa_programt &prog)
     if (goto_program_instruction_typet::DECL != it->type) continue;
     const irep_idt &id=get_affected_variable(*it);
     if (is_meta(it)) continue;
-    const symbol_exprt symbol(st.lookup(id).symbol_expr());
+    const symbol_exprt symbol(ns.lookup(id).symbol_expr());
     if (is_const(symbol)) continue;
     const typet &type=symbol.type();
-    pos=jsa_assign(st, gf, pos, symbol, side_effect_expr_nondett(type));
+    pos=jsa_assign(ns, gf, pos, symbol, side_effect_expr_nondett(type));
     prog.inductive_step_renondets.push_back(pos);
   }
 }

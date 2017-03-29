@@ -21,7 +21,7 @@ Author: Daniel Kroening, kroening@kroening.com
  */
 class jsa_randomt
 {
-  const class symbol_tablet &st;
+  const class namespacet &ns;
   const std::function<size_t()> pred_ops_count;
   const std::function<size_t()> const_pred_ops_count;
 public:
@@ -30,13 +30,14 @@ public:
    *
    * @details
    *
-   * @param st
+   * @param ns
    * @param pred_ops_count
    * @param const_pred_ops_count
    */
-  jsa_randomt(const symbol_tablet &st,
-      std::function<size_t()> pred_ops_count,
-      std::function<size_t()> const_pred_ops_count);
+  jsa_randomt(
+    const namespacet &ns,
+    std::function<size_t()> pred_ops_count,
+    std::function<size_t()> const_pred_ops_count);
 
   /**
    * @brief

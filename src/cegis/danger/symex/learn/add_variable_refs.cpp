@@ -31,12 +31,12 @@ void link_skolem(danger_programt &prog, const size_t num_user_vars,
 {
   const goto_programt::targetst &sklm=loop.danger_meta_variables.Sx;
   if (sklm.empty()) return;
-  const symbol_tablet &st=prog.st;
+  const namespacet ns(prog.st);
   goto_programt &body=get_entry_body(prog.gf);
   goto_programt::targett pos=sklm.front();
   const size_t num_skolem=sklm.size();
   const size_t num_tmp=max_solution_size - num_skolem;
-  link_temp_vars(st, body, --pos, num_tmp, user_vars);
+  link_temp_vars(ns, body, --pos, num_tmp, user_vars);
   goto_programt::targetst::const_iterator it=sklm.begin();
   for (size_t i=0; i < num_skolem - 1; ++i, ++it)
   {
@@ -44,12 +44,12 @@ void link_skolem(danger_programt &prog, const size_t num_user_vars,
     const goto_programt::instructiont &instr=*pos;
     const size_t id=num_tmp + i;
     const irep_idt &variable=get_affected_variable(instr);
-    pos=set_rops_reference(st, body, pos, variable, id);
-    pos=set_ops_reference(st, body, pos, variable, id + num_user_vars);
+    pos=set_rops_reference(ns, body, pos, variable, id);
+    pos=set_ops_reference(ns, body, pos, variable, id + num_user_vars);
   }
   pos=sklm.back();
   const size_t final_id=max_solution_size - 1;
-  set_rops_reference(st, body, pos, get_affected_variable(*pos), final_id);
+  set_rops_reference(ns, body, pos, get_affected_variable(*pos), final_id);
 }
 
 class link_meta_variablest
@@ -67,8 +67,9 @@ public:
   void operator()(const invariant_programt::invariant_loopt &loop) const
   {
     const invariant_programt::meta_vars_positionst &im=loop.meta_variables;
-    link_result_var(prog.st, prog.gf, user_vars, max_size, im.Ix);
-    link_result_var(prog.st, prog.gf, user_vars, max_size, im.Ix_prime);
+    const namespacet ns(prog.st);
+    link_result_var(ns, prog.gf, user_vars, max_size, im.Ix);
+    link_result_var(ns, prog.gf, user_vars, max_size, im.Ix_prime);
   }
 
   void operator()(const danger_programt::loopt &loop) const
@@ -76,8 +77,9 @@ public:
     operator()(static_cast<const invariant_programt::invariant_loopt &>(loop));
     const danger_programt::danger_meta_vars_positionst &dm=
         loop.danger_meta_variables;
-    auto inv=[this](const goto_programt::targett &pos)
-    { link_result_var(prog.st, prog.gf, user_vars, max_size, pos);};
+    const namespacet ns(prog.st);
+    auto inv=[this, &ns](const goto_programt::targett &pos)
+    { link_result_var(ns, prog.gf, user_vars, max_size, pos);};
     std::for_each(dm.Rx.begin(), dm.Rx.end(), inv);
     std::for_each(dm.Rx_prime.begin(), dm.Rx_prime.end(), inv);
     link_skolem(prog, user_vars, user_vars, max_size, loop);
@@ -88,9 +90,9 @@ public:
 void link_meta_variables(danger_programt &prog, const size_t user_vars,
     const size_t max_solution_size)
 {
-  const symbol_tablet &st=prog.st;
+  const namespacet ns(prog.st);
   goto_functionst &gf=prog.gf;
-  link_result_var(st, gf, user_vars, max_solution_size, prog.Ix0);
+  link_result_var(ns, gf, user_vars, max_solution_size, prog.Ix0);
   const danger_programt::loopst &loops=prog.loops;
   const link_meta_variablest link(prog, user_vars, max_solution_size);
   std::for_each(loops.begin(), loops.end(), link);

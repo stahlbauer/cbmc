@@ -70,15 +70,17 @@ void add_execute_placeholder(symbol_tablet &symbol_table,
   symbol_table.add(symbol);
 }
 
-goto_programt::targett init_array(const symbol_tablet &st, goto_programt &body,
-    const char * const name, goto_programt::targett pos)
+goto_programt::targett init_array(
+  const namespacet &ns,
+  goto_programt &body,
+  const char * const name,
+  goto_programt::targett pos)
 {
   pos=body.insert_after(pos);
   pos->type=goto_program_instruction_typet::ASSIGN;
   pos->source_location=default_cegis_source_location();
-  const symbol_exprt array(st.lookup(name).symbol_expr());
+  const symbol_exprt array(ns.lookup(name).symbol_expr());
   const array_typet &type=to_array_type(array.type());
-  const namespacet ns(st);
   pos->code=
     code_assignt(
       array,
@@ -86,12 +88,12 @@ goto_programt::targett init_array(const symbol_tablet &st, goto_programt &body,
   return pos;
 }
 
-void set_init_values(const symbol_tablet &st, goto_functionst &gf)
+void set_init_values(const namespacet &ns, goto_functionst &gf)
 {
   goto_programt &body=get_entry_body(gf);
   goto_programt::targett pos=body.instructions.begin();
-  pos=init_array(st, body, CEGIS_OPS, pos);
-  init_array(st, body, CEGIS_RESULT_OPS, pos);
+  pos=init_array(ns, body, CEGIS_OPS, pos);
+  init_array(ns, body, CEGIS_RESULT_OPS, pos);
 }
 }
 
@@ -122,7 +124,8 @@ void add_cegis_library(symbol_tablet &st, goto_functionst &gf,
   goto_convert(func_name, st, gf, msg);
   gf.compute_loop_numbers();
   gf.update();
-  set_init_values(st, gf);
+  const namespacet ns(st);
+  set_init_values(ns, gf);
 }
 
 void add_cegis_execute_placeholder(symbol_tablet &st)

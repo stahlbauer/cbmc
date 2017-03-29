@@ -39,11 +39,12 @@ void add_predicates(jsa_programt &prog, const jsa_solutiont::predicatest &preds)
   goto_programt::instructionst &instrs=body.instructions;
   std::string pred_id_name(JSA_PRED_EXEC);
   pred_id_name+="::pred_id";
-  const symbol_exprt pred_id(st.lookup(pred_id_name).symbol_expr());
+  const namespacet ns(st);
+  const symbol_exprt pred_id(ns.lookup(pred_id_name).symbol_expr());
   goto_programt::targett pos=body.insert_after(instrs.begin());
   declare_jsa_meta_variable(st, pos, JSA_PRED_RESULT, jsa_word_type());
   const std::string result(get_cegis_meta_name(JSA_PRED_RESULT));
-  const symbol_exprt ret_val(st.lookup(result).symbol_expr());
+  const symbol_exprt ret_val(ns.lookup(result).symbol_expr());
   const goto_programt::targett first=pos;
   pos=add_return_assignment(body, pos, JSA_PRED_EXEC, ret_val);
   const goto_programt::targett end=pos;
@@ -87,20 +88,24 @@ void add_predicates(jsa_programt &prog, const jsa_solutiont::predicatest &preds)
   body.compute_target_numbers();
 }
 
-void insert_invariant(const symbol_tablet &st, const goto_functionst &gf, goto_programt &body,
-    goto_programt::targett pos, const goto_programt::instructionst &prog)
+void insert_invariant(
+  const namespacet &ns,
+  const goto_functionst &gf,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const goto_programt::instructionst &prog)
 {
   assert(prog.size() == 1);
-  const symbol_exprt v(st.lookup(get_affected_variable(*pos)).symbol_expr());
+  const symbol_exprt v(ns.lookup(get_affected_variable(*pos)).symbol_expr());
   pos=body.insert_after(pos);
   pos->source_location=jsa_builtin_source_location();
   pos->type=goto_program_instruction_typet::FUNCTION_CALL;
   code_function_callt call;
   call.lhs()=v;
-  call.function()=st.lookup(JSA_INV_VERIFY_EXEC).symbol_expr();
+  call.function()=ns.lookup(JSA_INV_VERIFY_EXEC).symbol_expr();
   code_function_callt::argumentst &args=call.arguments();
   args.push_back(address_of_exprt(get_user_heap(gf)));
-  args.push_back(address_of_exprt(get_queried_heap(st)));
+  args.push_back(address_of_exprt(get_queried_heap(ns)));
   pos->code=call;
   remove_return(body, pos);
 }
@@ -113,9 +118,12 @@ const exprt &get_iterator_arg(const codet &code)
   return args.at(2);
 }
 
-void insert_sync_call(const symbol_tablet &st, const goto_functionst &gf,
-    goto_programt &body, goto_programt::targett pos,
-    const goto_programt::instructionst &query)
+void insert_sync_call(
+  const namespacet &ns,
+  const goto_functionst &gf,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const goto_programt::instructionst &query)
 {
   assert(!query.empty());
   if (query.empty()) return;
@@ -123,25 +131,28 @@ void insert_sync_call(const symbol_tablet &st, const goto_functionst &gf,
   code_function_callt sync;
   code_function_callt::argumentst &sync_args=sync.arguments();
   sync_args.push_back(address_of_exprt(get_user_heap(gf)));
-  sync_args.push_back(address_of_exprt(get_queried_heap(st)));
+  sync_args.push_back(address_of_exprt(get_queried_heap(ns)));
   sync_args.push_back(it_arg);
-  sync.function()=st.lookup(SYNC_IT).symbol_expr();
+  sync.function()=ns.lookup(SYNC_IT).symbol_expr();
   pos=insert_before_preserve_labels(body, pos);
   pos->type=goto_program_instruction_typet::FUNCTION_CALL;
   pos->source_location=jsa_builtin_source_location();
   pos->code=sync;
 }
 
-void make_full_query_call(const symbol_tablet &st, const goto_functionst &gf,
-    goto_programt &body, goto_programt::targett pos,
-    const goto_programt::instructionst &query)
+void make_full_query_call(
+  const namespacet &ns,
+  const goto_functionst &gf,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const goto_programt::instructionst &query)
 {
   if (query.empty()) return;
   pos=insert_before_preserve_labels(body, pos);
   pos->type=goto_program_instruction_typet::FUNCTION_CALL;
   pos->source_location=jsa_builtin_source_location();
   code_function_callt call;
-  call.function()=st.lookup(MAKE_NULL).symbol_expr();
+  call.function()=ns.lookup(MAKE_NULL).symbol_expr();
   code_function_callt::argumentst &args=call.arguments();
   args.push_back(address_of_exprt(get_user_heap(gf)));
   args.push_back(get_iterator_arg(query.front().code));
@@ -162,21 +173,21 @@ void insert_before(jsa_programt &jsa_prog, goto_programt &body,
 void insert_jsa_solution(jsa_programt &prog, const jsa_solutiont &solution)
 {
   add_predicates(prog, solution.predicates);
-  const symbol_tablet &st=prog.st;
+  const namespacet ns(prog.st);
   goto_functionst &gf=prog.gf;
   goto_programt &body=get_entry_body(gf);
 
   insert_before(prog, body, prog.base_case, solution.query);
-  insert_invariant(st, gf, body, prog.base_case, solution.invariant);
+  insert_invariant(ns, gf, body, prog.base_case, solution.invariant);
   insert_before(prog, body, prog.inductive_assumption, solution.query);
-  insert_invariant(st, gf, body, prog.inductive_assumption, solution.invariant);
-  insert_sync_call(st, gf, body, prog.inductive_step, solution.query);
+  insert_invariant(ns, gf, body, prog.inductive_assumption, solution.invariant);
+  insert_sync_call(ns, gf, body, prog.inductive_step, solution.query);
   insert_before(prog, body, prog.inductive_step, solution.query);
-  insert_invariant(st, gf, body, prog.inductive_step, solution.invariant);
-  make_full_query_call(st, gf, body, prog.property_entailment, solution.query);
+  insert_invariant(ns, gf, body, prog.inductive_step, solution.invariant);
+  make_full_query_call(ns, gf, body, prog.property_entailment, solution.query);
   insert_before(prog, body, prog.property_entailment, solution.query);
-  insert_sync_call(st, gf, body, prog.property_entailment, solution.query);
-  insert_invariant(st, gf, body, prog.property_entailment, solution.invariant);
+  insert_sync_call(ns, gf, body, prog.property_entailment, solution.query);
+  insert_invariant(ns, gf, body, prog.property_entailment, solution.invariant);
 
   body.compute_incoming_edges();
   body.compute_target_numbers();

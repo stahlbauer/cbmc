@@ -31,36 +31,45 @@ null_pointer_exprt get_null()
 }
 #endif
 
-void link_result_var(const symbol_tablet &st, goto_functionst &gf,
-    const size_t num_user_vars, const size_t max_solution_size,
-    goto_programt::targett pos)
+void link_result_var(
+  const namespacet &ns,
+  goto_functionst &gf,
+  const size_t num_user_vars,
+  const size_t max_solution_size,
+  goto_programt::targett pos)
 {
   goto_programt &body=get_entry_body(gf);
   const size_t num_temps=max_solution_size - 1;
-  pos=link_temp_vars(st, body, --pos, num_temps, num_user_vars);
+  pos=link_temp_vars(ns, body, --pos, num_temps, num_user_vars);
   ++pos;
-  set_rops_reference(st, body, pos, get_affected_variable(*pos), num_temps);
+  set_rops_reference(ns, body, pos, get_affected_variable(*pos), num_temps);
 }
 
-goto_programt::targett set_rops_reference(const symbol_tablet &st,
-    goto_programt &body, const goto_programt::targett &pos,
-    const irep_idt &name, const unsigned int id)
+goto_programt::targett set_rops_reference(
+  const namespacet &ns,
+  goto_programt &body,
+  const goto_programt::targett &pos,
+  const irep_idt &name,
+  const unsigned int id)
 {
-  return set_ops_reference(st, body, pos, CEGIS_RESULT_OPS, name, id);
+  return set_ops_reference(ns, body, pos, CEGIS_RESULT_OPS, name, id);
 }
 
-goto_programt::targett link_temp_vars(const symbol_tablet &st,
-    goto_programt &body, goto_programt::targett pos, const size_t num_temps,
-    const size_t num_user_vars)
+goto_programt::targett link_temp_vars(
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const size_t num_temps,
+  const size_t num_user_vars)
 {
   goto_programt::targett previous_successor(pos);
   ++previous_successor;
   for (size_t i=0; i < num_temps; ++i)
   {
     const std::string name=get_cegis_meta_name(get_tmp(i));
-    pos=set_rops_reference(st, body, pos, name, i);
+    pos=set_rops_reference(ns, body, pos, name, i);
     if (i == 0) move_labels(body, previous_successor, pos);
-    pos=set_ops_reference(st, body, pos, name, i + num_user_vars);
+    pos=set_ops_reference(ns, body, pos, name, i + num_user_vars);
   }
   return pos;
 }
@@ -70,7 +79,8 @@ void link_user_program_variables(invariant_programt &prog,
 {
   const goto_programt::targett begin=prog.invariant_range.begin;
   const goto_programt::targett end=prog.invariant_range.end;
-  link_user_program_variable_ops(prog.st, prog.gf, var_ids,
+  const namespacet ns(prog.st);
+  link_user_program_variable_ops(ns, prog.gf, var_ids,
       is_instrumentable_user_variable, begin, end);
 }
 

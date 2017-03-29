@@ -34,7 +34,7 @@ void refactor_symex_learnt::process(const counterexamplest &counterexamples,
   goto_functionst &gf=current_program.gf;
   for (const irep_idt &program : current_program.programs)
   {
-    symbolt &symbol=st.lookup(program);
+    symbolt &symbol=st.get(program);
     assign_in_cprover_init(gf, symbol, side_effect_expr_nondett(symbol.type));
   }
   transform_asserts_to_assumes(current_program.gf);

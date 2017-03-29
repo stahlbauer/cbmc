@@ -73,5 +73,8 @@ void add_danger_constant(invariant_programt &prog, const std::string &name,
   symbol_tablet &st=prog.st;
   create_cegis_symbol(st, name, type).value=value;
   if (!is_empty(value))
-    pos=cegis_assign_user_variable(st, prog.gf, pos, name, value);
+  {
+    const namespacet ns(st);
+    pos=cegis_assign_user_variable(ns, prog.gf, pos, name, value);
+  }
 }

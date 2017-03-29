@@ -72,13 +72,13 @@ std::set<irep_idt> get_nullable_methods(const refactor_programt &prog)
   return nullable_methods;
 }
 
-cegis_operand_datat slots_per_type(const symbol_tablet &st,
-    const std::set<irep_idt> &state_vars)
+cegis_operand_datat slots_per_type(
+  const namespacet &ns,
+  const std::set<irep_idt> &state_vars)
 {
-  const namespacet ns(st);
   cegis_operand_datat result;
   for (const irep_idt &state_var : state_vars)
-    ++result[ns.follow(st.lookup(state_var).type)];
+    ++result[ns.follow(ns.lookup(state_var).type)];
   return result;
 }
 
@@ -94,9 +94,11 @@ cegis_operand_datat get_operand_signature(const symbol_tablet &st,
   assert(st.has_symbol(method));
   // TODO: Add global vars
   cegis_operand_datat result;
-  const code_typet &code_type=to_code_type(st.lookup(method).type);
+  const namespacet ns(st);
+  const code_typet &code_type=to_code_type(ns.lookup(method).type);
   const std::string ret_val_name(get_return_value_name(method));
-  if (st.has_symbol(ret_val_name)) result[st.lookup(ret_val_name).type]=1;
+  if(st.has_symbol(ret_val_name))
+    result[ns.lookup(ret_val_name).type]=1;
   for (const code_typet::parameterst::value_type &param : code_type.parameters())
     ++result[param.type()];
   return result;
@@ -133,17 +135,18 @@ std::vector<irep_idt> prepare_ops(symbol_tablet &st, const goto_functionst &gf,
   assert(size == params.size());
   const source_locationt &loc=first->source_location;
   goto_programt::targett pos=first;
+  const namespacet ns(st);
   for (size_t i=0; i < size; ++i)
     if (!params[i].get_this())
     {
-      const symbolt &lhs=st.lookup(params[i].get_identifier());
+      const symbolt &lhs=ns.lookup(params[i].get_identifier());
       if (first == pos)
       {
         pos=insert_before_preserve_labels(body, pos);
         pos->source_location=loc;
         pos->function=first->function;
       } else pos=insert_after_preserving_source_location(body, pos);
-      cegis_assign(st, *pos, lhs.symbol_expr(), args[i], loc);
+      cegis_assign(ns, *pos, lhs.symbol_expr(), args[i], loc);
       result.push_back(lhs.name);
     }
   // TODO: Add globals
@@ -155,6 +158,7 @@ void replace_method_call_by_processor(symbol_tablet &st, goto_functionst &gf,
     goto_programt::targett first, const goto_programt::targett last,
     const irep_idt &meth, const std::string &processor, const std::string &prog)
 {
+  const namespacet ns(st);
   // TODO: Find topmost class for "method" to uniquely identify it.
   goto_programt &body=get_body(gf, first);
   for (; first != last; ++first)
@@ -164,10 +168,10 @@ void replace_method_call_by_processor(symbol_tablet &st, goto_functionst &gf,
       if (!ops.empty())
       {
         goto_programt::targett pos=insert_before_preserve_labels(body, first);
-        instrument_cegis_operand(st, *pos, 0, ops.front());
+        instrument_cegis_operand(ns, *pos, 0, ops.front());
         for (size_t i=1; i < ops.size(); ++i)
-          pos=instrument_cegis_operand(st, body, pos, i, ops[i]);
+          pos=instrument_cegis_operand(ns, body, pos, i, ops[i]);
       }
-      call_processor(st, *first, processor, prog);
+      call_processor(ns, *first, processor, prog);
     }
 }

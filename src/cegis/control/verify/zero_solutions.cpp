@@ -39,8 +39,8 @@ struct_exprt make_zero(const namespacet &ns, const symbol_typet &type)
 void zero_rational_solutiont::operator ()(control_solutiont &solution) const
 {
   if (!solution.a.operands().empty()) return;
-  const symbol_typet &type=control_solution_type(st);
   const namespacet ns(st);
+  const symbol_typet &type=control_solution_type(ns);
   const struct_exprt zero_struct=make_zero(ns, type);
   solution.a=get_a_controller_comp(ns, zero_struct);
   solution.b=get_b_controller_comp(ns, zero_struct);
@@ -56,7 +56,7 @@ void zero_vector_solutiont::operator ()(
 {
   if (!solution.K.operands().empty()) return;
   const namespacet ns(st);
-  const array_typet &type=control_vector_solution_type(st);
+  const array_typet &type=control_vector_solution_type(ns);
   const source_locationt loc(default_cegis_source_location());
   solution.K=to_array_expr(zero_initializer(type, loc, ns));
 }

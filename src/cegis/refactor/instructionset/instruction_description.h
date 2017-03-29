@@ -16,7 +16,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 typedef std::function<
     goto_programt::targett(
-        const symbol_tablet &,
+        const namespacet &,
         std::string,
         goto_programt &,
         goto_programt::targett)> instruction_factoryt;
@@ -77,7 +77,7 @@ public:
    *
    * @details
    *
-   * @param st
+   * @param ns
    * @param func_name
    * @param body
    * @param pos
@@ -85,7 +85,7 @@ public:
    * @return
    */
   goto_programt::targett operator()(
-      const symbol_tablet &st,
+      const namespacet &ns,
       const std::string &func_name,
       goto_programt &body,
       goto_programt::targett pos) const;

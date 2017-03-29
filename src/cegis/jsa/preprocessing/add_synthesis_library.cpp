@@ -55,7 +55,7 @@ std::string get_array_size(const typet &type)
 std::string get_sizes(const symbol_tablet &st)
 {
   const namespacet ns(st);
-  const typet &type=ns.follow(st.lookup(JSA_HEAP_TAG).type);
+  const typet &type=ns.follow(ns.lookup(JSA_HEAP_TAG).type);
   const struct_typet &struct_type=to_struct_type(type);
   std::string sizes("#define __CPROVER_JSA_MAX_CONCRETE_NODES ");
   sizes+=get_array_size(struct_type.get_component("concrete_nodes").type());
@@ -107,9 +107,9 @@ void zero_new_global_vars(const symbol_tablet &st, goto_functionst &gf)
     }
 }
 
-bool is_const(const symbol_tablet &st, const goto_programt::instructiont &instr)
+bool is_const(const namespacet &ns, const goto_programt::instructiont &instr)
 {
-  return is_jsa_const(st.lookup(get_affected_variable(instr)).symbol_expr());
+  return is_jsa_const(ns.lookup(get_affected_variable(instr)).symbol_expr());
 }
 }
 
@@ -125,9 +125,10 @@ void add_jsa_library(jsa_programt &prog, const size_t max_sz,
   const size_t num_pred_ops=pred_op_locations.size();
   library_text+=std::to_string(num_pred_ops);
   symbol_tablet &st=prog.st;
+  const namespacet ns(st);
   const size_t num_result_pred_ops=std::count_if(pred_op_locations.begin(),
-      pred_op_locations.end(), [&st](const goto_programt::targett &target)
-      { return !is_const(st, *target);});
+      pred_op_locations.end(), [&ns](const goto_programt::targett &target)
+      { return !is_const(ns, *target);});
   library_text+="\n#define __CPROVER_JSA_NUM_PRED_RESULT_OPS ";
   library_text+=std::to_string(num_result_pred_ops);
   library_text+='\n';

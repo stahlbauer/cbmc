@@ -28,6 +28,7 @@ std::string get_name(size_t index)
 goto_programt::targett default_jsa_constant_strategy(symbol_tablet &st,
     goto_functionst &gf)
 {
+  const namespacet ns(st);
   const std::vector<constant_exprt> literals(collect_integer_literals(st, gf));
   const typet word_type(jsa_word_type());
   size_t const_index=0u;
@@ -41,7 +42,7 @@ goto_programt::targett default_jsa_constant_strategy(symbol_tablet &st,
     const std::string base_name(get_name(const_index++));
     pos=body.insert_after(pos);
     declare_jsa_meta_variable(st, pos, base_name, expr_value.type());
-    pos=assign_jsa_meta_variable(st, gf, pos, base_name, expr_value);
+    pos=assign_jsa_meta_variable(ns, gf, pos, base_name, expr_value);
   }
   return pos;
 }

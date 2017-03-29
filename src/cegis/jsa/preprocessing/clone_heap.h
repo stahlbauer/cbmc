@@ -27,20 +27,20 @@ const class symbol_exprt &get_user_heap(const class goto_functionst &gf);
  *
  * @details
  *
- * @param st
+ * @param ns
  * @return
  */
-symbol_exprt get_queried_heap(const class symbol_tablet &st);
+symbol_exprt get_queried_heap(const namespacet &ns);
 
 /**
  * @brief
  *
  * @details
  *
- * @param st
+ * @param ns
  * @return
  */
-symbol_exprt get_org_heap(const symbol_tablet &st);
+symbol_exprt get_org_heap(const namespacet &ns);
 
 /**
  * @brief
@@ -56,15 +56,15 @@ void clone_heap(class jsa_programt &prog);
  *
  * @details
  *
- * @param st
+ * @param ns
  * @param body
  * @param pos
  * @param heap_ptr
  */
 goto_programt::targett assume_valid_heap(
-    const symbol_tablet &st,
-    goto_programt &body,
-    goto_programt::targett pos,
-    const exprt &heap_ptr);
+  const namespacet &ns,
+  goto_programt &body,
+  goto_programt::targett pos,
+  const exprt &heap_ptr);
 
 #endif // CPROVER_CEGIS_JSA_PREPROCESSING_CLONE_HEAP_H
