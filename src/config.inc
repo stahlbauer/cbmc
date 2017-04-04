@@ -1,6 +1,9 @@
 # Build platform (use one of AUTO, Unix, OSX_Universal, MSVC, Cygwin, MinGW)
 BUILD_ENV = AUTO
 
+CXXFLAGS=-O2 -pg -finline-limit=4
+LINKFLAGS=-pg
+
 # Enable all warnings
 #CXXFLAGS += -Wall -Wno-long-long -Wno-sign-compare -Wno-parentheses -Wno-strict-aliasing -pedantic
 
