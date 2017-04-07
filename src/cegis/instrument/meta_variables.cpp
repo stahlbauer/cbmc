@@ -7,7 +7,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 
 #include <goto-programs/goto_functions.h>
 

@@ -10,7 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <algorithm>
 
 #include <util/arith_tools.h>
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 
 #include <goto-programs/remove_returns.h>
 

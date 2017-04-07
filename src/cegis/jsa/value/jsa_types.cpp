@@ -7,7 +7,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 
 #include <cegis/jsa/instrument/jsa_meta_data.h>
 #include <cegis/jsa/value/jsa_types.h>

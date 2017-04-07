@@ -9,7 +9,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <util/arith_tools.h>
 
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 #include <linking/zero_initializer.h>
 
 #include <cegis/instrument/literals.h>

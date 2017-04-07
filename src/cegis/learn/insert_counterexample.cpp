@@ -9,7 +9,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <algorithm>
 
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 #include <util/arith_tools.h>
 #include <util/cprover_prefix.h>
 #include <linking/zero_initializer.h>

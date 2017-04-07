@@ -7,7 +7,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 
 #include <util/fixedbv.h>
 #include <util/ieee_float.h>

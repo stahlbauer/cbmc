@@ -9,7 +9,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <goto-programs/goto_convert_functions.h>
 
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 #include <ansi-c/cprover_library.h>
 
 #include <linking/zero_initializer.h>

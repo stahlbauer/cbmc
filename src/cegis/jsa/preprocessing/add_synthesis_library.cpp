@@ -10,7 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <algorithm>
 
 #include <ansi-c/cprover_library.h>
-#include <ansi-c/c_types.h>
+#include <util/c_types.h>
 #include <util/bv_arithmetic.h>
 #include <goto-programs/goto_convert_functions.h>
 #include <linking/linking.h>
