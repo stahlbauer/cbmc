@@ -18,6 +18,8 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <cegis/control/value/control_types.h>
 
+#include <cegis/control/value/float_helper.h>
+
 #define FLOAT_WIDTH 32u
 
 double to_control_float(const constant_exprt &expr)
