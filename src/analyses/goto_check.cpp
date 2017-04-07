@@ -1238,7 +1238,7 @@ void goto_checkt::bounds_check(
     plus_exprt effective_offset(ode.offset(), pointer_offset(pointer));
 
     assert(effective_offset.op0().type()==effective_offset.op1().type());
-    assert(effective_offset.type()==size.type());
+    effective_offset.make_typecast(size.type());
 
     binary_relation_exprt inequality(effective_offset, ID_lt, size);
 
