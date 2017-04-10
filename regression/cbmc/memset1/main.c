@@ -5,7 +5,7 @@
 int main()
 {
   int A[5];
-  memset(A, 0, sizeof(int)*sizeof(A));
+  memset(A, 0, sizeof(int)*5);
   assert(A[0]==0);
   assert(A[1]==0);
   assert(A[2]==0);
