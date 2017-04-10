@@ -1316,7 +1316,8 @@ void value_sett::assign(
     }
     else
     {
-      if(!base_type_eq(rhs.type(), type, ns))
+      if(rhs.type().id()!=ID_array ||
+         !base_type_eq(rhs.type().subtype(), type.subtype(), ns))
         throw "value_sett::assign type mismatch: "
           "rhs.type():\n"+rhs.type().pretty()+"\n"+
           "type:\n"+type.pretty();
