@@ -3826,6 +3826,9 @@ std::string expr2ct::convert_code(
   if(statement==ID_array_copy)
     return convert_code_array_copy(src, indent);
 
+  if(statement==ID_array_replace)
+    return convert_code_array_replace(src, indent);
+
   if(statement=="set_may" ||
      statement=="set_must")
     return
@@ -4217,6 +4220,39 @@ std::string expr2ct::convert_code_array_copy(
     if(it!=src.operands().begin())
       dest+=", ";
     // TODO: ggf. Klammern je nach p
+    dest+=arg_str;
+  }
+
+  dest+=");";
+
+  return dest;
+}
+
+/*******************************************************************\
+
+Function: expr2ct::convert_code_array_replace
+
+  Inputs:
+
+ Outputs:
+
+ Purpose:
+
+\*******************************************************************/
+
+std::string expr2ct::convert_code_array_replace(
+  const codet &src,
+  unsigned indent)
+{
+  std::string dest=indent_str(indent)+"ARRAY_REPLACE(";
+
+  forall_operands(it, src)
+  {
+    unsigned p;
+    std::string arg_str=convert(*it, p);
+
+    if(it!=src.operands().begin())
+      dest+=", ";
     dest+=arg_str;
   }
 
