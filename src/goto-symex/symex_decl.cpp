@@ -69,6 +69,7 @@ void goto_symext::symex_decl(statet &state, const symbol_exprt &expr)
   const irep_idt &l1_identifier=ssa.get_identifier();
 
   // rename type to L2
+  state.l1_types.erase(l1_identifier);
   state.rename(ssa.type(), l1_identifier, ns);
   ssa.update_type();
 

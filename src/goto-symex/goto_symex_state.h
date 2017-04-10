@@ -173,11 +173,11 @@ protected:
   // only required for value_set.assign
   void get_l1_name(exprt &expr) const;
 
+public:
   // this maps L1 names to (L2) types
   typedef std::unordered_map<irep_idt, typet, irep_id_hash> l1_typest;
   l1_typest l1_types;
 
-public:
   // uses level 1 names, and is used to
   // do dereferencing
   value_sett value_set;
