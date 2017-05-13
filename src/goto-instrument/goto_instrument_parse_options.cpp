@@ -952,6 +952,12 @@ void goto_instrument_parse_optionst::get_goto_program()
 
   config.set(cmdline);
   config.set_from_symbol_table(symbol_table);
+
+  if(goto_functions.check_internal_invariants())
+  {
+    error() << "GOTO program violates internal invariants" << eom;
+    throw 0;
+  }
 }
 
 /*******************************************************************\

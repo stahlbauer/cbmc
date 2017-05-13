@@ -39,3 +39,25 @@ void get_local_identifiers(
       dest.insert(identifier);
   }
 }
+
+/*******************************************************************\
+
+Function: goto_functionst::check_internal_invariants
+
+  Inputs:
+
+ Outputs: Returns true iff an invariant is violated
+
+ Purpose: Ensure that all functions satisfy all assumptions
+          about consistent goto programs.
+
+\*******************************************************************/
+
+bool goto_functionst::check_internal_invariants() const
+{
+  forall_goto_functions(it, *this)
+    if(it->second.body.check_internal_invariants())
+      return true;
+
+  return false;
+}

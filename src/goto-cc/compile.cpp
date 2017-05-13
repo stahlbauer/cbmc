@@ -133,6 +133,12 @@ bool compilet::doit()
       return true;
   }
 
+  if(compiled_functions.check_internal_invariants())
+  {
+    error() << "GOTO program violates internal invariants" << eom;
+    return true;
+  }
+
   return false;
 }
 

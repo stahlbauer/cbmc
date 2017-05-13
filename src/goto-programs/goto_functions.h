@@ -17,6 +17,7 @@ Date: June 2003
 class goto_functionst:public goto_functions_templatet<goto_programt>
 {
 public:
+  bool check_internal_invariants() const;
 };
 
 #define Forall_goto_functions(it, functions) \

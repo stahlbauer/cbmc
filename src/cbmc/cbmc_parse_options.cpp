@@ -728,6 +728,12 @@ int cbmc_parse_optionst::get_goto_program(
 
     goto_convert(symbol_table, goto_functions, ui_message_handler);
 
+    if(goto_functions.check_internal_invariants())
+    {
+      error() << "GOTO program violates internal invariants" << eom;
+      return 6;
+    }
+
     if(process_goto_program(options, goto_functions))
       return 6;
 

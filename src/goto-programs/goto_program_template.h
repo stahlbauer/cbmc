@@ -250,6 +250,55 @@ public:
       instruction_id_builder << type;
       return instruction_id_builder.str();
     }
+
+    bool check_internal_invariants() const
+    {
+      if(function.empty())
+        return true;
+
+      switch(type)
+      {
+        case GOTO:
+        case ASSUME:
+        case ASSERT:
+          if(code.is_not_nil() ||
+             guard.is_nil())
+            return true;
+          return false;
+        case OTHER:
+          return false;
+        case SKIP:
+        case LOCATION:
+        case END_FUNCTION:
+          return code.is_not_nil();
+        case START_THREAD:
+          return false;
+        case END_THREAD:
+          return false;
+        case ATOMIC_BEGIN:
+          return false;
+        case ATOMIC_END:
+          return false;
+        case RETURN:
+          return false;
+        case ASSIGN:
+          if(code.get_statement()!=ID_assign)
+            return true;
+          return false;
+        case DECL:
+          return code.is_nil();
+        case DEAD:
+          return code.is_nil();
+        case FUNCTION_CALL:
+          return code.is_nil();
+        case THROW:
+          return false;
+        case CATCH:
+          return false;
+        default:
+          return true;
+      }
+    }
   };
 
   typedef std::list<instructiont> instructionst;
@@ -453,6 +502,14 @@ public:
   }
 
   targett get_end_function()
+  {
+    assert(!instructions.empty());
+    const auto end_function=std::prev(instructions.end());
+    assert(end_function->is_end_function());
+    return end_function;
+  }
+
+  const_targett get_end_function() const
   {
     assert(!instructions.empty());
     const auto end_function=std::prev(instructions.end());

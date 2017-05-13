@@ -609,3 +609,32 @@ std::string as_string(
 
   return "";
 }
+
+/*******************************************************************\
+
+Function: goto_programt::check_internal_invariants
+
+  Inputs:
+
+ Outputs: Returns true iff an invariant is violated
+
+ Purpose: Ensure the current goto_programt satisfies all assumptions
+          about consistent goto programs.
+
+\*******************************************************************/
+
+bool goto_programt::check_internal_invariants() const
+{
+  if(empty())
+    return false;
+
+  forall_goto_program_instructions(it, *this)
+    if(it->check_internal_invariants())
+      return true;
+
+  // the last instruction must be END_FUNCTION
+  if(!get_end_function()->is_end_function())
+    return true;
+
+  return false;
+}
