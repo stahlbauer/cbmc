@@ -8,6 +8,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <cassert>
 
+#include "config.h"
 #include "simplify_expr_class.h"
 #include "expr.h"
 #include "namespace.h"
@@ -202,7 +203,7 @@ bool simplify_exprt::simplify_member(exprt &expr)
 
     if(target_size!=-1)
     {
-      mp_integer target_bits=target_size*8;
+      mp_integer target_bits=target_size*config.ansi_c.char_width;
       std::string bits=expr2bits(op, true);
 
       if(mp_integer(bits.size())>=target_bits)

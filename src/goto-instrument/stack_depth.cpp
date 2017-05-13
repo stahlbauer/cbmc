@@ -14,6 +14,8 @@ Date: November 2011
 #include <util/arith_tools.h>
 #include <util/cprover_prefix.h>
 
+#include <ansi-c/c_types.h>
+
 #include <goto-programs/goto_functions.h>
 
 #include "stack_depth.h"
@@ -33,7 +35,7 @@ Function: add_stack_depth_symbol
 symbol_exprt add_stack_depth_symbol(symbol_tablet &symbol_table)
 {
   const irep_idt identifier="$stack_depth";
-  signedbv_typet type(sizeof(int)*8);
+  typet type=size_type();
 
   symbolt new_symbol;
   new_symbol.name=identifier;

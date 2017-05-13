@@ -11,6 +11,7 @@ Date: April 2010
 #include <limits>
 #include <algorithm>
 
+#include <util/config.h>
 #include <util/std_code.h>
 #include <util/std_expr.h>
 #include <util/pointer_offset_size.h>
@@ -235,7 +236,7 @@ void rw_range_sett::get_objects_byte_extract(
     get_objects_rec(mode, be.op(), -1, size);
   else
   {
-    index*=8;
+    index*=config.ansi_c.char_width;
     if(index>=pointer_offset_bits(be.op().type(), ns))
       return;
 

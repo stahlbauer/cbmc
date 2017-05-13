@@ -9,6 +9,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <cassert>
 
 #include <util/arith_tools.h>
+#include <util/config.h>
 #include <util/std_expr.h>
 #include <util/byte_operators.h>
 #include <util/endianness_map.h>
@@ -76,11 +77,12 @@ bvt boolbvt::convert_byte_extract(const byte_extract_exprt &expr)
   #if 0
   if(expr.id()==ID_byte_extract_big_endian &&
      expr.type().id()==ID_c_bit_field &&
-     (width%8)!=0)
+     (width%config.ansi_c.char_width)!=0)
   {
     byte_extract_exprt tmp=expr;
     // round up
-    to_c_bit_field_type(tmp.type()).set_width(width+8-width%8);
+    to_c_bit_field_type(tmp.type()).set_width(
+      width+config.ansi_c.char_width-width%config.ansi_c.char_width);
     convert_byte_extract(tmp, bv);
     bv.resize(width); // chop down
     return;
@@ -116,7 +118,7 @@ bvt boolbvt::convert_byte_extract(const byte_extract_exprt &expr)
   bv.resize(width);
 
   // see if the byte number is constant
-  unsigned byte_width=8;
+  unsigned byte_width=config.ansi_c.char_width;
 
   mp_integer index;
   if(!to_integer(offset, index))

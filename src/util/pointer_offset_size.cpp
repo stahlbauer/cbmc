@@ -40,7 +40,11 @@ member_offset_iterator &member_offset_iterator::operator++()
     {
       // take the extra bytes needed
       std::size_t w=to_c_bit_field_type(comp.type()).get_width();
-      for(; w>bit_field_bits; ++current.second, bit_field_bits+=8) {}
+      while(w>bit_field_bits)
+      {
+        ++current.second;
+        bit_field_bits+=config.ansi_c.char_width;
+      }
       bit_field_bits-=w;
     }
     else
@@ -142,7 +146,9 @@ mp_integer pointer_offset_size(
   mp_integer bits=pointer_offset_bits(type, ns);
   if(bits==-1)
     return -1;
-  return bits/8+(((bits%8)==0)?0:1);
+  return
+    bits/config.ansi_c.char_width+
+    (((bits%config.ansi_c.char_width)==0)?0:1);
 }
 
 /*******************************************************************\
@@ -346,8 +352,12 @@ exprt member_offset_expr(
     if(it->type().id()==ID_c_bit_field)
     {
       std::size_t w=to_c_bit_field_type(it->type()).get_width();
-      std::size_t bytes;
-      for(bytes=0; w>bit_field_bits; ++bytes, bit_field_bits+=8) {}
+      std::size_t bytes=0;
+      while(w>bit_field_bits)
+      {
+        ++bytes;
+        bit_field_bits+=config.ansi_c.char_width;
+      }
       bit_field_bits-=w;
       result=plus_exprt(result, from_integer(bytes, result.type()));
     }
@@ -453,8 +463,12 @@ exprt size_of_expr(
       if(it->type().id()==ID_c_bit_field)
       {
         std::size_t w=to_c_bit_field_type(it->type()).get_width();
-        std::size_t bytes;
-        for(bytes=0; w>bit_field_bits; ++bytes, bit_field_bits+=8) {}
+        std::size_t bytes=0;
+        while(w>bit_field_bits)
+        {
+          ++bytes;
+          bit_field_bits+=config.ansi_c.char_width;
+        }
         bit_field_bits-=w;
         result=plus_exprt(result, from_integer(bytes, result.type()));
       }
@@ -494,8 +508,8 @@ exprt size_of_expr(
       if(subtype.id()==ID_c_bit_field)
       {
         std::size_t bits=to_c_bit_field_type(subtype).get_width();
-        sub_size=bits/8;
-        if((bits%8)!=0)
+        sub_size=bits/config.ansi_c.char_width;
+        if((bits%config.ansi_c.char_width)!=0)
           ++sub_size;
       }
       else
@@ -515,16 +529,16 @@ exprt size_of_expr(
           type.id()==ID_c_bool)
   {
     std::size_t width=to_bitvector_type(type).get_width();
-    std::size_t bytes=width/8;
-    if(bytes*8!=width)
+    std::size_t bytes=width/config.ansi_c.char_width;
+    if(bytes*config.ansi_c.char_width!=width)
       bytes++;
     return from_integer(bytes, signedbv_typet(config.ansi_c.pointer_width));
   }
   else if(type.id()==ID_c_enum)
   {
     std::size_t width=to_bitvector_type(type.subtype()).get_width();
-    std::size_t bytes=width/8;
-    if(bytes*8!=width)
+    std::size_t bytes=width/config.ansi_c.char_width;
+    if(bytes*config.ansi_c.char_width!=width)
       bytes++;
     return from_integer(bytes, signedbv_typet(config.ansi_c.pointer_width));
   }
@@ -539,8 +553,8 @@ exprt size_of_expr(
   else if(type.id()==ID_pointer)
   {
     std::size_t width=config.ansi_c.pointer_width;
-    std::size_t bytes=width/8;
-    if(bytes*8!=width)
+    std::size_t bytes=width/config.ansi_c.char_width;
+    if(bytes*config.ansi_c.char_width!=width)
       bytes++;
     return from_integer(bytes, signedbv_typet(config.ansi_c.pointer_width));
   }
@@ -554,8 +568,10 @@ exprt size_of_expr(
   }
   else if(type.id()==ID_string)
   {
-    return from_integer(
-      32/8, signedbv_typet(config.ansi_c.pointer_width));
+    return
+      from_integer(
+        32/config.ansi_c.char_width,
+        signedbv_typet(config.ansi_c.pointer_width));
   }
   else
     return nil_exprt();

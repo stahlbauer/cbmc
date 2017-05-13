@@ -299,6 +299,8 @@ bool ansi_c_entry_point(
       }
 
       {
+        // TODO I have no idea what MAX refers to, or how the
+        // int_width-4 relates to it
         // assume argc is at most MAX/8-1
         mp_integer upper_bound=
           power(2, config.ansi_c.int_width-4);

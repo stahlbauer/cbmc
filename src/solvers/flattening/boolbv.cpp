@@ -10,6 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <map>
 #include <set>
 
+#include <util/config.h>
 #include <util/symbol.h>
 #include <util/mp_arith.h>
 #include <util/arith_tools.h>
@@ -235,7 +236,10 @@ bvt boolbvt::convert_bitvector(const exprt &expr)
 
     if(expr.type().id()==ID_unsignedbv ||
        expr.type().id()==ID_signedbv)
-      return bv_utils.build_constant(op_width/8, result_width);
+      return
+        bv_utils.build_constant(
+          op_width/config.ansi_c.char_width,
+          result_width);
   }
   else if(expr.id()==ID_case)
     return convert_case(expr);

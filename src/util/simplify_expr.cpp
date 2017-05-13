@@ -1963,13 +1963,14 @@ bool simplify_exprt::simplify_byte_extract(byte_extract_exprt &expr)
                 byte_extract_id()==ID_byte_extract_little_endian);
 
     // double the string until we have sufficiently many bits
-    while(mp_integer(const_bits.size())<offset*8+el_size)
+    mp_integer string_len=offset*config.ansi_c.char_width+el_size;
+    while(mp_integer(const_bits.size())<string_len)
       const_bits+=const_bits;
 
     std::string el_bits=
       std::string(
         const_bits,
-        integer2size_t(offset*8),
+        integer2size_t(offset*config.ansi_c.char_width),
         integer2size_t(el_size));
 
     exprt tmp=
@@ -1987,7 +1988,7 @@ bool simplify_exprt::simplify_byte_extract(byte_extract_exprt &expr)
 
   // in some cases we even handle non-const array_of
   if(expr.op().id()==ID_array_of &&
-     (offset*8)%el_size==0 &&
+     (offset*config.ansi_c.char_width)%el_size==0 &&
      el_size<=pointer_offset_bits(expr.op().op0().type(), ns))
   {
     expr.op()=index_exprt(expr.op(), expr.offset());
@@ -2002,12 +2003,12 @@ bool simplify_exprt::simplify_byte_extract(byte_extract_exprt &expr)
     expr2bits(expr.op(), expr.id()==ID_byte_extract_little_endian);
   // exact match of length only - otherwise we might lose bits of
   // flexible array members at the end of a struct
-  if(mp_integer(bits.size())==el_size+offset*8)
+  if(mp_integer(bits.size())==el_size+offset*config.ansi_c.char_width)
   {
     std::string bits_cut=
       std::string(
         bits,
-        integer2size_t(offset*8),
+        integer2size_t(offset*config.ansi_c.char_width),
         integer2size_t(el_size));
 
     exprt tmp=
@@ -2043,8 +2044,8 @@ bool simplify_exprt::simplify_byte_extract(byte_extract_exprt &expr)
       // no arrays of zero-sized objects
       assert(el_size>0);
       // no arrays of non-byte sized objects
-      assert(el_size%8==0);
-      mp_integer el_bytes=el_size/8;
+      assert(el_size%config.ansi_c.char_width==0);
+      mp_integer el_bytes=el_size/config.ansi_c.char_width;
 
       if(base_type_eq(expr.type(), op_type_ptr->subtype(), ns))
       {
@@ -2094,7 +2095,7 @@ bool simplify_exprt::simplify_byte_extract(byte_extract_exprt &expr)
       if(m_size<=0)
         break;
 
-      if(offset*8==m_offset_bits &&
+      if(offset*config.ansi_c.char_width==m_offset_bits &&
          el_size==m_size &&
          base_type_eq(expr.type(), component.type(), ns))
       {
@@ -2104,15 +2105,17 @@ bool simplify_exprt::simplify_byte_extract(byte_extract_exprt &expr)
 
         return false;
       }
-      else if(offset*8>=m_offset_bits &&
-              offset*8+el_size<=m_offset_bits+m_size &&
-              m_offset_bits%8==0)
+      else if(offset*config.ansi_c.char_width>=m_offset_bits &&
+              offset*config.ansi_c.char_width+el_size<=m_offset_bits+m_size &&
+              m_offset_bits%config.ansi_c.char_width==0)
       {
         expr.op()=
           member_exprt(expr.op(), component.get_name(), component.type());
         simplify_member(expr.op());
         expr.offset()=
-          from_integer(offset-m_offset_bits/8, expr.offset().type());
+          from_integer(
+            offset-m_offset_bits/config.ansi_c.char_width,
+            expr.offset().type());
         simplify_rec(expr.offset());
 
         return false;
@@ -2289,13 +2292,13 @@ bool simplify_exprt::simplify_byte_update(byte_update_exprt &expr)
       mp_integer m_offset=
         member_offset(struct_type, component.get_name(), ns);
       mp_integer m_size_bits=pointer_offset_bits(component.type(), ns);
-      mp_integer m_size_bytes=m_size_bits/8;
+      mp_integer m_size_bytes=m_size_bits/config.ansi_c.char_width;
 
       // can we determine the current offset, and is it a byte-sized
       // member?
       if(m_offset<0 ||
          m_size_bits<=0 ||
-         m_size_bits%8!=0)
+         m_size_bits%config.ansi_c.char_width!=0)
       {
         result_expr.make_nil();
         break;
@@ -2362,7 +2365,9 @@ bool simplify_exprt::simplify_byte_update(byte_update_exprt &expr)
   if(root.id()==ID_array)
   {
     mp_integer el_size=pointer_offset_bits(op_type.subtype(), ns);
-    if(el_size<=0 || el_size%8!=0 || val_size%8!=0)
+    if(el_size<=0 ||
+       el_size%config.ansi_c.char_width!=0 ||
+       val_size%config.ansi_c.char_width!=0)
       return true;
 
     exprt result=root;
@@ -2370,27 +2375,30 @@ bool simplify_exprt::simplify_byte_update(byte_update_exprt &expr)
     mp_integer m_offset_bits=0, val_offset=0;
     Forall_operands(it, result)
     {
-      if(offset_int*8+val_size<=m_offset_bits)
+      if(offset_int*config.ansi_c.char_width+val_size<=m_offset_bits)
         break;
 
-      if(offset_int*8<m_offset_bits+el_size)
+      if(offset_int*config.ansi_c.char_width<m_offset_bits+el_size)
       {
-        mp_integer bytes_req=(m_offset_bits+el_size)/8-offset_int;
+        mp_integer bytes_req=
+          (m_offset_bits+el_size)/config.ansi_c.char_width-offset_int;
         bytes_req-=val_offset;
-        if(val_offset+bytes_req>val_size/8)
-          bytes_req=val_size/8-val_offset;
+        if(val_offset+bytes_req>val_size/config.ansi_c.char_width)
+          bytes_req=val_size/config.ansi_c.char_width-val_offset;
 
         byte_extract_exprt new_val(
           byte_extract_id(),
           value,
           from_integer(val_offset, offset.type()),
-          array_typet(unsignedbv_typet(8),
+          array_typet(unsignedbv_typet(config.ansi_c.char_width),
                       from_integer(bytes_req, offset.type())));
 
         *it=byte_update_exprt(
           expr.id(),
           *it,
-          from_integer(offset_int+val_offset-m_offset_bits/8, offset.type()),
+          from_integer(
+            offset_int+val_offset-m_offset_bits/config.ansi_c.char_width,
+            offset.type()),
           new_val);
 
         simplify_rec(*it);

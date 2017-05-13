@@ -9,6 +9,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <cassert>
 
 #include <util/arith_tools.h>
+#include <util/config.h>
 #include <util/std_types.h>
 #include <util/std_expr.h>
 #include <util/fixedbv.h>
@@ -525,13 +526,13 @@ void smt1_convt::convert_byte_update(
 
   if(expr.id()==ID_byte_update_little_endian)
   {
-    lower = i*8;
+    lower = i*config.ansi_c.char_width;
     upper = lower+op_w-1;
   }
   else
   {
-    upper = max-(i*8);
-    lower = max-(i*8+op_w-1);
+    upper = max-(i*config.ansi_c.char_width);
+    lower = max-(i*config.ansi_c.char_width+op_w-1);
   }
 
   if(upper==max)
@@ -1214,7 +1215,8 @@ void smt1_convt::convert_expr(const exprt &expr, bool bool_as_bv)
     if(op_width==0)
       throw "conversion failed";
 
-    out << "bv" << op_width/8 << "[" << result_width << "]";
+    out << "bv" << op_width/config.ansi_c.char_width
+        << "[" << result_width << "]";
   }
   else if(expr.id()==ID_abs)
   {

@@ -82,7 +82,7 @@ std::string as_vcd_binary(
      type.id()==ID_bv)
     width=string2integer(type.get_string(ID_width));
   else
-    width=pointer_offset_size(type, ns)*8;
+    width=pointer_offset_bits(type, ns);
 
   if(width>=0)
     return std::string(integer2size_t(width), 'x');

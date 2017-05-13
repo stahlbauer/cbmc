@@ -11,6 +11,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <util/arith_tools.h>
 #include <util/byte_operators.h>
+#include <util/config.h>
 #include <util/endianness_map.h>
 
 #include "boolbv.h"
@@ -49,7 +50,7 @@ bvt boolbvt::convert_byte_update(const byte_update_exprt &expr)
 
   const bvt &value_bv=convert_bv(value);
   std::size_t update_width=value_bv.size();
-  std::size_t byte_width=8;
+  std::size_t byte_width=config.ansi_c.char_width;
 
   if(update_width>bv.size())
     update_width=bv.size();
@@ -60,7 +61,7 @@ bvt boolbvt::convert_byte_update(const byte_update_exprt &expr)
   if(!to_integer(offset_expr, index))
   {
     // yes!
-    mp_integer offset=index*8;
+    mp_integer offset=index*byte_width;
 
     if(offset+update_width>mp_integer(bv.size()) || offset<0)
     {

@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <util/config.h>
 #include <util/expr.h>
 #include <util/std_types.h>
 #include <util/std_expr.h>
@@ -66,7 +67,7 @@ exprt flatten_byte_extract(
     const typet &offset_type=ns.follow(offset.type());
 
     // byte-array?
-    if(element_width==8)
+    if(element_width==config.ansi_c.char_width)
     {
       // get 'width'-many bytes, and concatenate
       std::size_t width_bytes=integer2unsigned(num_elements);
@@ -84,7 +85,8 @@ exprt flatten_byte_extract(
         op.push_back(index_expr);
       }
 
-      // TODO this doesn't seem correct if size_bits%8!=0 as more
+      // TODO this doesn't seem correct if
+      // size_bits%config.ansi_c.char_width!=0 as more
       // bits than the original expression will be returned.
       if(width_bytes==1)
         return op.front();
@@ -107,9 +109,11 @@ exprt flatten_byte_extract(
       concatenation_exprt concat(
         unsignedbv_typet(integer2unsigned(element_width*num_elements)));
 
-      assert(element_width%8==0);
+      assert(element_width%config.ansi_c.char_width==0);
       exprt first_index=
-        div_exprt(offset, from_integer(element_width/8, offset_type));
+        div_exprt(
+          offset,
+          from_integer(element_width/config.ansi_c.char_width, offset_type));
 
       // byte extract will do the appropriate mapping, thus MSB comes
       // last here (as opposed to the above, where no further byte
@@ -125,8 +129,9 @@ exprt flatten_byte_extract(
       }
 
       // the new offset is offset%width
-      mod_exprt new_offset(offset,
-                           from_integer(element_width/8, offset_type));
+      mod_exprt new_offset(
+        offset,
+        from_integer(element_width/config.ansi_c.char_width, offset_type));
 
       // build new byte-extract expression
       byte_extract_exprt tmp(src);
@@ -154,11 +159,14 @@ exprt flatten_byte_extract(
       adjusted_offset=offset;
     else
     {
-      exprt width_constant=from_integer(op0_bits/8-1, offset_type);
+      exprt width_constant=
+        from_integer(op0_bits/config.ansi_c.char_width-1, offset_type);
       adjusted_offset=minus_exprt(width_constant, offset);
     }
 
-    mult_exprt times_eight(adjusted_offset, from_integer(8, offset_type));
+    mult_exprt times_eight(
+      adjusted_offset,
+      from_integer(config.ansi_c.char_width, offset_type));
 
     // cast to generic bit-vector
     std::size_t op0_width=integer2unsigned(op0_bits);
@@ -378,31 +386,37 @@ exprt flatten_byte_update(
           t.id()==ID_pointer)
   {
     // do a shift, mask and OR
-    std::size_t width=integer2size_t(pointer_offset_size(t, ns)*8);
+    std::size_t width=integer2size_t(pointer_offset_bits(t, ns));
 
     assert(width!=0);
 
-    if(element_size*8>width)
+    if(element_size*config.ansi_c.char_width>width)
       throw "flatten_byte_update to update element that is too large";
 
     // build mask
     exprt mask=
-      from_integer(power(2, element_size*8)-1, unsignedbv_typet(width));
+      from_integer(
+        power(2, element_size*config.ansi_c.char_width)-1,
+        unsignedbv_typet(width));
 
     // zero-extend the value, but only if needed
     exprt value_extended;
 
-    if(width>integer2unsigned(element_size)*8)
+    if(width>integer2unsigned(element_size)*config.ansi_c.char_width)
       value_extended=
         concatenation_exprt(
           from_integer(
-            0, unsignedbv_typet(width-integer2unsigned(element_size)*8)),
+            0,
+            unsignedbv_typet(
+              width-integer2unsigned(element_size)*config.ansi_c.char_width)),
           src.op2(), t);
     else
       value_extended=src.op2();
 
     const typet &offset_type=ns.follow(src.op1().type());
-    mult_exprt offset_times_eight(src.op1(), from_integer(8, offset_type));
+    mult_exprt offset_times_eight(
+      src.op1(),
+      from_integer(config.ansi_c.char_width, offset_type));
 
     binary_predicate_exprt offset_ge_zero(
       offset_times_eight,

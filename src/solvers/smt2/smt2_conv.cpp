@@ -9,6 +9,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <cassert>
 
 #include <util/arith_tools.h>
+#include <util/config.h>
 #include <util/expr_util.h>
 #include <util/std_types.h>
 #include <util/std_expr.h>
@@ -781,13 +782,13 @@ void smt2_convt::convert_byte_update(const byte_update_exprt &expr)
 
   if(expr.id()==ID_byte_update_little_endian)
   {
-    lower = i*8;
+    lower = i*config.ansi_c.char_width;
     upper = lower+value_width-1;
   }
   else if(expr.id()==ID_byte_update_big_endian)
   {
-    upper = max-(i*8);
-    lower = max-((i+1)*8-1);
+    upper = max-(i*config.ansi_c.char_width);
+    lower = max-((i+1)*config.ansi_c.char_width-1);
   }
   else
     UNEXPECTEDCASE("byte update neither big nor little endian");
@@ -838,7 +839,7 @@ void smt2_convt::convert_byte_update(const byte_update_exprt &expr)
   #else
 
   // We'll do an AND-mask for op(), and then OR-in
-  // the value() shifted by the offset * 8.
+  // the value() shifted by the offset * char width.
 
   std::size_t total_width=boolbv_width(expr.op().type());
   std::size_t value_width=boolbv_width(expr.value().type());
@@ -848,7 +849,7 @@ void smt2_convt::convert_byte_update(const byte_update_exprt &expr)
 
   exprt distance=mult_exprt(
     expr.offset(),
-    from_integer(8, expr.offset().type()));
+    from_integer(config.ansi_c.char_width, expr.offset().type()));
 
   exprt and_expr=bitand_exprt(expr.op(), bitnot_exprt(one_mask));
   exprt ext_value=typecast_exprt(expr.value(), one_mask.type());
@@ -1734,7 +1735,7 @@ void smt2_convt::convert_expr(const exprt &expr)
     if(op_width==0)
       INVALIDEXPR("conversion failed");
 
-    out << "(_ bv" << op_width/8
+    out << "(_ bv" << op_width/config.ansi_c.char_width
         << " " << result_width << ")";
   }
   else if(expr.id()==ID_abs)
@@ -4221,12 +4222,12 @@ void smt2_convt::convert_member(const member_exprt &expr)
     {
       // we extract
       std::size_t member_width=boolbv_width(expr.type());
-      mp_integer member_offset=::member_offset(struct_type, name, ns);
+      mp_integer member_offset=::member_offset_bits(struct_type, name, ns);
       if(member_offset==-1)
         INVALIDEXPR("failed to get struct member offset");
 
-      out << "((_ extract " << (member_offset*8+member_width-1)
-          << " " << member_offset*8 << ") ";
+      out << "((_ extract " << (member_offset+member_width-1)
+          << " " << member_offset << ") ";
       convert_expr(struct_op);
       out << ")";
     }

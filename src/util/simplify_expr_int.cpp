@@ -47,12 +47,12 @@ bool simplify_exprt::simplify_bswap(exprt &expr)
     std::vector<mp_integer> bytes;
 
     // take apart
-    for(std::size_t bit=0; bit<width; bit+=8)
-      bytes.push_back((value >> bit)%256);
+    for(std::size_t bit=0; bit<width; bit+=config.ansi_c.char_width)
+      bytes.push_back((value >> bit)%(1<<config.ansi_c.char_width));
 
     // put back together, but backwards
     mp_integer new_value=0;
-    for(std::size_t bit=0; bit<width; bit+=8)
+    for(std::size_t bit=0; bit<width; bit+=config.ansi_c.char_width)
     {
       assert(!bytes.empty());
       new_value+=bytes.back()<<bit;

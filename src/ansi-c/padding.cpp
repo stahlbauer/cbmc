@@ -29,6 +29,8 @@ Function: alignment
 
 mp_integer alignment(const typet &type, const namespacet &ns)
 {
+  const unsigned bits=config.ansi_c.char_width;
+
   // we need to consider a number of different cases:
   // - alignment specified in the source, which will be recorded in
   // ID_C_alignment
@@ -85,7 +87,7 @@ mp_integer alignment(const typet &type, const namespacet &ns)
           type.id()==ID_c_bool)
   {
     std::size_t width=to_bitvector_type(type).get_width();
-    result=width%8?width/8+1:width/8;
+    result=width%bits?width/bits+1:width/bits;
   }
   else if(type.id()==ID_c_enum)
     result=alignment(type.subtype(), ns);
@@ -94,7 +96,7 @@ mp_integer alignment(const typet &type, const namespacet &ns)
   else if(type.id()==ID_pointer)
   {
     std::size_t width=config.ansi_c.pointer_width;
-    result=width%8?width/8+1:width/8;
+    result=width%bits?width/bits+1:width/bits;
   }
   else if(type.id()==ID_symbol)
     result=alignment(ns.follow(type), ns);
@@ -152,9 +154,10 @@ void add_padding(struct_typet &type, const namespacet &ns)
       else if(bit_field_bits!=0)
       {
         // not on a byte-boundary?
-        if((bit_field_bits%8)!=0)
+        if((bit_field_bits%config.ansi_c.char_width)!=0)
         {
-          std::size_t pad=8-bit_field_bits%8;
+          std::size_t pad=
+            config.ansi_c.char_width-bit_field_bits%config.ansi_c.char_width;
           c_bit_field_typet padding_type(unsignedbv_typet(pad), pad);
 
           struct_typet::componentt component;
@@ -174,9 +177,10 @@ void add_padding(struct_typet &type, const namespacet &ns)
     }
 
     // Add padding at the end?
-    if((bit_field_bits%8)!=0)
+    if((bit_field_bits%config.ansi_c.char_width)!=0)
     {
-      std::size_t pad=8-bit_field_bits%8;
+      std::size_t pad=
+        config.ansi_c.char_width-bit_field_bits%config.ansi_c.char_width;
       c_bit_field_typet padding_type(unsignedbv_typet(pad), pad);
 
       struct_typet::componentt component;
@@ -225,8 +229,12 @@ void add_padding(struct_typet &type, const namespacet &ns)
           max_alignment=a;
 
         std::size_t w=to_c_bit_field_type(it_type).get_width();
-        std::size_t bytes;
-        for(bytes=0; w>bit_field_bits; ++bytes, bit_field_bits+=8) {}
+        std::size_t bytes=0;
+        while(w>bit_field_bits)
+        {
+          ++bytes;
+          bit_field_bits+=config.ansi_c.char_width;
+        }
         bit_field_bits-=w;
         offset+=bytes;
         continue;
@@ -252,7 +260,7 @@ void add_padding(struct_typet &type, const namespacet &ns)
         mp_integer pad=a-displacement;
 
         unsignedbv_typet padding_type;
-        padding_type.set_width(integer2unsigned(pad*8));
+        padding_type.set_width(integer2unsigned(pad*config.ansi_c.char_width));
 
         struct_typet::componentt component;
         component.type()=padding_type;
@@ -274,8 +282,8 @@ void add_padding(struct_typet &type, const namespacet &ns)
 
   if(bit_field_bits!=0)
   {
-    // these are now assumed to be multiples of 8
-    offset+=bit_field_bits/8;
+    // these are now assumed to be multiples of bytes
+    offset+=bit_field_bits/config.ansi_c.char_width;
   }
 
   // any explicit alignment for the struct?
@@ -309,7 +317,7 @@ void add_padding(struct_typet &type, const namespacet &ns)
       mp_integer pad=max_alignment-displacement;
 
       unsignedbv_typet padding_type;
-      padding_type.set_width(integer2unsigned(pad*8));
+      padding_type.set_width(integer2unsigned(pad*config.ansi_c.char_width));
 
       // we insert after any final 'flexible member'
       struct_typet::componentt component;
@@ -336,7 +344,7 @@ Function: add_padding
 
 void add_padding(union_typet &type, const namespacet &ns)
 {
-  mp_integer max_alignment=alignment(type, ns)*8;
+  mp_integer max_alignment=alignment(type, ns)*config.ansi_c.char_width;
   mp_integer size_bits=pointer_offset_bits(type, ns);
 
   union_typet::componentst &components=type.components();
@@ -344,8 +352,8 @@ void add_padding(union_typet &type, const namespacet &ns)
   // Is the union packed?
   if(type.get_bool(ID_C_packed))
   {
-    // The size needs to be a multiple of 8 only.
-    max_alignment=8;
+    // The size needs to be a multiple of bytes only.
+    max_alignment=config.ansi_c.char_width;
   }
 
   // The size must be a multiple of the alignment, or
