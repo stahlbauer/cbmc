@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <climits>
 #include <cstdlib>
 #include <cctype>
 #include <cassert>
@@ -199,7 +200,7 @@ const mp_integer binary2integer(const std::string &n, bool is_signed)
   if(n.empty())
     return 0;
 
-  if(n.size()<=(sizeof(unsigned long)*8))
+  if(n.size()<=(sizeof(unsigned long)*CHAR_BIT))
   {
     // this is a tuned implementation for short integers
 

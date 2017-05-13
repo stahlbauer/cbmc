@@ -7,6 +7,7 @@ Author: Daniel Kroening, kroening@kroening.com
 \*******************************************************************/
 
 #include <algorithm>
+#include <climits>
 #include <fstream>
 #include <map>
 #include <string>
@@ -148,7 +149,7 @@ protected:
         error() << "unexpected end of bytecode file" << eom;
         throw 0;
       }
-      result<<=8;
+      result<<=CHAR_BIT;
       result|=in->get();
     }
     return result;

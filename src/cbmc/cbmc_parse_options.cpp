@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <climits>
 #include <fstream>
 #include <cstdlib> // exit()
 #include <iostream>
@@ -474,7 +475,7 @@ int cbmc_parse_optionst::doit()
   // Print a banner
   //
   status() << "CBMC version " CBMC_VERSION " "
-           << sizeof(void *)*8 << "-bit "
+           << sizeof(void *)*CHAR_BIT << "-bit "
            << config.this_architecture() << " "
            << config.this_operating_system() << eom;
 
@@ -1047,7 +1048,7 @@ void cbmc_parse_optionst::help()
     "\n"
     "* *   CBMC " CBMC_VERSION " - Copyright (C) 2001-2016 ";
 
-  std::cout << "(" << (sizeof(void *)*8) << "-bit version)";
+  std::cout << "(" << (sizeof(void *)*CHAR_BIT) << "-bit version)";
 
   std::cout << "   * *\n";
 

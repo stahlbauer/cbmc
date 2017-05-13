@@ -7,6 +7,7 @@ Author: Daniel Kroening, kroening@kroening.com
 \*******************************************************************/
 
 #include <cassert>
+#include <climits>
 
 #include <util/arith_tools.h>
 #include <util/std_expr.h>
@@ -62,7 +63,7 @@ exprt convert_character_literal(
       for(unsigned i=0; i<value.size(); i++)
       {
         mp_integer z=(unsigned char)(value[i]);
-        z=z<<((value.size()-i-1)*8);
+        z=z<<((value.size()-i-1)*CHAR_BIT);
         x+=z;
       }
 
@@ -95,7 +96,7 @@ exprt convert_character_literal(
       for(unsigned i=0; i<value.size(); i++)
       {
         mp_integer z=(unsigned char)(value[i]);
-        z=z<<((value.size()-i-1)*8);
+        z=z<<((value.size()-i-1)*CHAR_BIT);
         x+=z;
       }
 

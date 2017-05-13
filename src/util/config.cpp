@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <climits>
 #include <cstdlib>
 
 #include "namespace.h"
@@ -1234,20 +1235,20 @@ bool configt::set(const cmdlinet &cmdline)
   // the same architecture and OS that we are verifying for.
   if(arch==this_arch && os==this_os)
   {
-    assert(ansi_c.int_width==sizeof(int)*8);
-    assert(ansi_c.long_int_width==sizeof(long)*8);
-    assert(ansi_c.bool_width==sizeof(bool)*8);
-    assert(ansi_c.char_width==sizeof(char)*8);
-    assert(ansi_c.short_int_width==sizeof(short)*8);
-    assert(ansi_c.long_long_int_width==sizeof(long long)*8);
-    assert(ansi_c.pointer_width==sizeof(void *)*8);
-    assert(ansi_c.single_width==sizeof(float)*8);
-    assert(ansi_c.double_width==sizeof(double)*8);
+    assert(ansi_c.int_width==sizeof(int)*CHAR_BIT);
+    assert(ansi_c.long_int_width==sizeof(long)*CHAR_BIT);
+    assert(ansi_c.bool_width==sizeof(bool)*CHAR_BIT);
+    assert(ansi_c.char_width==sizeof(char)*CHAR_BIT);
+    assert(ansi_c.short_int_width==sizeof(short)*CHAR_BIT);
+    assert(ansi_c.long_long_int_width==sizeof(long long)*CHAR_BIT);
+    assert(ansi_c.pointer_width==sizeof(void *)*CHAR_BIT);
+    assert(ansi_c.single_width==sizeof(float)*CHAR_BIT);
+    assert(ansi_c.double_width==sizeof(double)*CHAR_BIT);
     assert(ansi_c.char_is_unsigned==(static_cast<char>(255)==255));
 
     #ifndef _WIN32
     // On Windows, long double width varies by compiler
-    assert(ansi_c.long_double_width==sizeof(long double)*8);
+    assert(ansi_c.long_double_width==sizeof(long double)*CHAR_BIT);
     #endif
   }
 

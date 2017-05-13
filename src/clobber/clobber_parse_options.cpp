@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <climits>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -631,7 +632,7 @@ void clobber_parse_optionst::help()
     "\n"
     "* *     CLOBBER " CBMC_VERSION " - Copyright (C) 2014 ";
 
-  std::cout << "(" << (sizeof(void *)*8) << "-bit version)";
+  std::cout << "(" << (sizeof(void *)*CHAR_BIT) << "-bit version)";
 
   std::cout << "     * *\n";
 

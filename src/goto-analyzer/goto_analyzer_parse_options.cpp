@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <climits>
 #include <cstdlib> // exit()
 #include <iostream>
 #include <fstream>
@@ -208,7 +209,7 @@ int goto_analyzer_parse_optionst::doit()
   // Print a banner
   //
   status() << "GOTO-ANALYSER version " CBMC_VERSION " "
-           << sizeof(void *)*8 << "-bit "
+           << sizeof(void *)*CHAR_BIT << "-bit "
            << config.this_architecture() << " "
            << config.this_operating_system() << eom;
 
@@ -520,7 +521,7 @@ void goto_analyzer_parse_optionst::help()
     "\n"
     "* * GOTO-ANALYSER " CBMC_VERSION " - Copyright (C) 2016 ";
 
-  std::cout << "(" << (sizeof(void *)*8) << "-bit version)";
+  std::cout << "(" << (sizeof(void *)*CHAR_BIT) << "-bit version)";
 
   std::cout << " * *\n";
 

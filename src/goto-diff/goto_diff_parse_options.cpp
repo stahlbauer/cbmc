@@ -6,6 +6,7 @@ Author: Peter Schrammel
 
 \*******************************************************************/
 
+#include <climits>
 #include <fstream>
 #include <cstdlib> // exit()
 #include <iostream>
@@ -312,7 +313,7 @@ int goto_diff_parse_optionst::doit()
   // Print a banner
   //
   status() << "GOTO-DIFF version " CBMC_VERSION " "
-           << sizeof(void *)*8 << "-bit "
+           << sizeof(void *)*CHAR_BIT << "-bit "
            << config.this_architecture() << " "
            << config.this_operating_system() << eom;
 

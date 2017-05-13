@@ -7,6 +7,7 @@ Author: Daniel Kroening
 \*******************************************************************/
 
 #include <cassert>
+#include <climits>
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
@@ -199,7 +200,7 @@ static std::istream &my_wgetline(std::istream &in, std::wstring &dest)
       break; // line end
     }
     else
-      dest+=wchar_t(ch1+(ch2<<8));
+      dest+=wchar_t(ch1+(ch2<<CHAR_BIT));
   }
 
   return in;

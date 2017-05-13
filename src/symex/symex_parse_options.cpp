@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <climits>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -668,7 +669,7 @@ void symex_parse_optionst::help()
     "\n"
     "* *     Symex " CBMC_VERSION " - Copyright (C) 2013 ";
 
-  std::cout << "(" << (sizeof(void *)*8) << "-bit version)";
+  std::cout << "(" << (sizeof(void *)*CHAR_BIT) << "-bit version)";
 
   std::cout << "     * *\n";
 
