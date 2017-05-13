@@ -42,6 +42,11 @@ mp_integer member_offset(
   const irep_idt &member,
   const namespacet &ns);
 
+mp_integer member_offset_bits(
+  const struct_typet &type,
+  const irep_idt &member,
+  const namespacet &ns);
+
 mp_integer pointer_offset_size(
   const typet &type,
   const namespacet &ns);
