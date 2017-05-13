@@ -22,7 +22,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "c_types.h"
 #include "c_typecast.h"
 #include "c_typecheck_base.h"
-#include "c_sizeof.h"
 #include "c_qualifiers.h"
 #include "string_constant.h"
 #include "anonymous_member.h"
@@ -643,7 +642,9 @@ void c_typecheck_baset::typecheck_expr_builtin_offsetof(exprt &expr)
 
           if(type.id()==ID_struct)
           {
-            exprt o=c_offsetof(to_struct_type(type), component_name, *this);
+            exprt o=
+              member_offset_expr(
+                to_struct_type(type), component_name, *this);
 
             if(o.is_nil())
             {
@@ -684,7 +685,8 @@ void c_typecheck_baset::typecheck_expr_builtin_offsetof(exprt &expr)
                 if(type.id()==ID_struct)
                 {
                   exprt o=
-                    c_offsetof(to_struct_type(type), c_it->get_name(), *this);
+                    member_offset_expr(
+                      to_struct_type(type), c_it->get_name(), *this);
 
                   if(o.is_nil())
                   {
@@ -736,7 +738,7 @@ void c_typecheck_baset::typecheck_expr_builtin_offsetof(exprt &expr)
       // still need to typecheck index
       typecheck_expr(index);
 
-      exprt sub_size=c_sizeof(type.subtype(), *this);
+      exprt sub_size=size_of_expr(type.subtype(), *this);
       if(index.type()!=size_type())
         index.make_typecast(size_type());
       result=plus_exprt(result, mult_exprt(sub_size, index));
@@ -1082,7 +1084,7 @@ void c_typecheck_baset::typecheck_expr_sizeof(exprt &expr)
     throw 0;
   }
 
-  exprt new_expr=c_sizeof(type, *this);
+  exprt new_expr=size_of_expr(type, *this);
 
   if(new_expr.is_nil())
   {
