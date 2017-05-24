@@ -24,7 +24,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "dump_c_class.h"
 
 #include "dump_c.h"
-#include "../util/symbol.h"
 
 /*******************************************************************\
 
@@ -1275,9 +1274,19 @@ void dump_ct::convert_function_declaration(
 
     os_body << "// " << symbol.name << std::endl;
     os_body << "// " << symbol.location << std::endl;
-    os_body << make_decl(symbol.name, symbol.type) << std::endl;
-    os_body << expr_to_string(b);
-    os_body << std::endl << std::endl;
+    const std::string &fn_decl_str = make_decl(symbol.name, symbol.type);
+    if (fn_decl_str.find("...")==std::string::npos
+        && fn_decl_str.find("va_list")==std::string::npos) {
+      os_body<<fn_decl_str<<std::endl;
+      os_body<<expr_to_string(b);
+      os_body<<std::endl<<std::endl;
+    } else {
+      if (fn_decl_str.find("extern ")==std::string::npos) {
+        os_body<<"extern ";
+      }
+      os_body<<fn_decl_str<<";";
+      os_body<<std::endl;
+    }
 
     declared_enum_constants.swap(enum_constants_bak);
   }
